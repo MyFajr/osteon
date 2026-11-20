@@ -478,19 +478,19 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         desc: "Нажмите «Проверить», затем кнопку на геймпаде, чтобы увидеть её номер.",
         render: (setting) => {
           setting.addButton((b) =>
-            b.setButtonText("Test").onClick(() => {
+            b.setButtonText("Проверить").onClick(() => {
               b.setButtonText("Нажмите кнопку…");
               this.plugin.gamepad.listener = (n) => {
                 this.plugin.gamepad.listener = null;
                 const dir = { 100: " (влево)", 101: " (вправо)", 102: " (вверх)", 103: " (вниз)" }[n as 100] ?? "";
-                b.setButtonText(`Button ${n}${dir}`);
+                b.setButtonText(`Кнопка ${n}${dir}`);
               };
             }),
           );
         },
       },
       {
-        name: "Buttons",
+        name: "Кнопки",
         desc: "Что делает каждая кнопка геймпада на стороне вопроса, стороне ответа и в списке колод.",
         render: (setting) => {
           setting.settingEl.addClass("fc-setting-stack");
