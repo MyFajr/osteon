@@ -822,7 +822,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           name: "Сбросить клавиши к значениям Anki",
           render: (setting) => {
             setting.addButton((b) =>
-              b.setButtonText("Reset").onClick(async () => {
+              b.setButtonText("Сбросить").onClick(async () => {
                 s.keys = { ...DEFAULT_KEYS };
                 await save();
                 this.redraw();
@@ -847,7 +847,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 .addOption("strict", "Только сложные термины (как в AMBOSS)")
                 .addOption("uncommon", "Редкие слова")
                 .addOption("all", "Все медицинские термины")
-                .addOption("off", "Off")
+                .addOption("off", "Выкл.")
                 .setValue(s.hover.sensitivity)
                 .onChange(async (v) => {
                   s.hover.sensitivity = v as typeof s.hover.sensitivity;
@@ -893,7 +893,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 }),
               )
               .addButton((b) =>
-                b.setButtonText(this.plugin.terms.hasMesh() ? "Update" : "Download").onClick(async () => {
+                b.setButtonText(this.plugin.terms.hasMesh() ? "Обновить" : "Скачать").onClick(async () => {
                   b.setDisabled(true);
                   await this.plugin.terms.downloadMesh();
                   this.redraw();
