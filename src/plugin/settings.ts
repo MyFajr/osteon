@@ -30,7 +30,7 @@ export const ACTIONS = {
   toggleMasks: "Переключать маски (скрытие изображений)",
   revealNext: "Открыть следующий ответ (по одному)",
   revealAll: "Открыть или скрыть все ответы (по одному)",
-  bury: "Отложить карточку",
+  bury: "Отложить до завтра",
   suspend: "Приостановить карточку",
   setDue: "Задать срок",
   cardInfo: "Информация о карточке",
@@ -39,8 +39,8 @@ export const ACTIONS = {
   browse: "Обзор (в Anki: B)",
   addCard: "Добавить карточку (в Anki: A)",
   stats: "Статистика из списка колод (в Anki: T)",
-  filteredDeck: "Создать фильтрованную колоду из списка колод (в Anki: F)",
-  customStudy: "Своё занятие из обзора колоды (в Anki: C)",
+  filteredDeck: "Создать отфильтрованную колоду из списка колод (в Anki: F)",
+  customStudy: "Выборочное изучение из обзора колоды (в Anki: C)",
   close: "Закрыть занятие",
 } as const;
 export type ActionName = keyof typeof ACTIONS;
