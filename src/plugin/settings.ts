@@ -1010,7 +1010,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         },
         {
           name: "Никогда не отправлять карточки из этих папок",
-          desc: "Comma-separated.",
+          desc: "Перечислите папки через запятую.",
           render: (setting) => {
             setting.addText((t) => {
               t.setValue(s.ai.excludeFolders.join(", "));
