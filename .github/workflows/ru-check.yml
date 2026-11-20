@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-and-build:
@@ -46,13 +46,13 @@ jobs:
           test -s styles.css
           node -e "const m=require('./manifest.json'); if (!m.id || !m.version || m.isDesktopOnly) process.exit(1); console.log('Plugin manifest OK:', m.id, m.version)"
 
-      - name: Upload built plugin files
-        uses: actions/upload-artifact@v4
-        with:
-          name: osteon-russian-1.4.4
-          path: |
-            main.js
-            manifest.json
-            styles.css
-          if-no-files-found: error
-          retention-days: 30
+      - name: Commit compiled plugin entry point to the translation branch
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f main.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build: update compiled Osteon plugin"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
