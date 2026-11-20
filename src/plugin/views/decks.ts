@@ -70,13 +70,13 @@ export class DeckView extends ItemView {
     const menu = new Menu();
     menu.addItem((i) =>
       i
-        .setTitle("Rename")
+        .setTitle("Переименовать")
         .setIcon("pencil")
         .onClick(() => new RenameDeckModal(this.app, this.plugin, path, (from, to) => this.renamed(from, to)).open()),
     );
     menu.addItem((i) =>
       i
-        .setTitle("Options")
+        .setTitle("Параметры")
         .setIcon("settings")
         .onClick(() => new DeckOptionsModal(this.app, this.plugin, path).open()),
     );
@@ -88,7 +88,7 @@ export class DeckView extends ItemView {
     );
     menu.addItem((i) =>
       i
-        .setTitle(hidden ? "Unhide" : "Hide")
+        .setTitle(hidden ? "Показать" : "Скрыть")
         .setIcon(hidden ? "eye" : "eye-off")
         .onClick(() => void this.plugin.setDeckHidden(path, !hidden)),
     );
@@ -231,7 +231,7 @@ export class DeckView extends ItemView {
       const tr = body.createEl("tr", { cls: "fc-filtered-row" });
       const nameCell = tr.createEl("td", { cls: "fc-deck-name fc-deck-name-flat" });
       nameCell.createSpan({ cls: "fc-toggle" });
-      const link = nameCell.createEl("a", { text: def.name, cls: "fc-deck-link fc-filtered-name", attr: { title: `Фильтровальная колода: ${def.search}` } });
+      const link = nameCell.createEl("a", { text: def.name, cls: "fc-deck-link fc-filtered-name", attr: { title: `Отфильтрованная колода: ${def.search}` } });
       link.onclick = () => void this.plugin.openFiltered(def.id);
       tr.createEl("td", { text: String(c.fresh), cls: `fc-num fc-new ${c.fresh ? "" : "fc-zero"}` });
       tr.createEl("td", { text: String(c.learning), cls: `fc-num fc-learn ${c.learning ? "" : "fc-zero"}` });
@@ -311,7 +311,7 @@ export class DeckView extends ItemView {
     browse.onclick = () => this.plugin.openBrowse();
     const stats = buttons.createEl("button", { text: "Статистика" });
     stats.onclick = () => this.plugin.openStats(null);
-    const filtered = buttons.createEl("button", { text: "Создать фильтрованную колоду" });
+    const filtered = buttons.createEl("button", { text: "Создать отфильтрованную колоду" });
     filtered.onclick = () => new FilteredDeckModal(this.app, this.plugin).open();
     const weak = this.plugin.weakToday().length;
     const wb = buttons.createEl("button", { text: weak ? `Слабые места (${weak})` : "Слабые места" });
@@ -319,7 +319,7 @@ export class DeckView extends ItemView {
     wb.onclick = () => void this.plugin.openWeak();
     const leeches = this.plugin.leeches().length;
     if (leeches) {
-      const lb = buttons.createEl("button", { text: `Leeches (${leeches})` });
+      const lb = buttons.createEl("button", { text: `Карточки, которые часто забываются (${leeches})` });
       lb.onclick = () => void this.plugin.openLeeches();
     }
     const imp = buttons.createEl("button", { text: "Импорт колоды" });
