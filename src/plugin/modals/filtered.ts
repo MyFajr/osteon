@@ -190,7 +190,7 @@ export class CustomStudyModal extends Modal {
     }
     const made = customStudyDeck(deck, this.kind, this.n, { state: this.state, tags: this.tags, limit: this.n });
     // Like Anki, Custom Study reuses one "Выборочное изучение" deck.
-    const existing = plugin.settings.filteredDecks.find((d) => (d.name === made.name || d.name === "Своё занятие"));
+    const existing = plugin.settings.filteredDecks.find((d) => (d.name === made.name || d.name === "Custom Study Session" || d.name === "Своё занятие"));
     const def: FilteredDeck = { ...made, id: existing?.id ?? newId(plugin) };
     const n = await plugin.buildFilteredDeck(def);
     this.close();
