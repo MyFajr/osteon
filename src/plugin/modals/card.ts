@@ -56,7 +56,7 @@ export class EditCardModal extends Modal {
 const STATE_NAME: Record<number, string> = {
   [State.New]: "Новые",
   [State.Learning]: "Изучение",
-  [State.Review]: "Review",
+  [State.Review]: "Повторение",
   [State.Relearning]: "Доизучение",
 };
 
@@ -85,27 +85,27 @@ export class CardInfoModal extends Modal {
     const now = new Date();
     const rows: Array<[string, string]> = [
       ["Колода", this.ref.deck.split("/").join(" › ")],
-      ["Note", `${this.ref.path}, строка ${this.ref.card.startLine + 1}`],
-      ["Card", this.ref.key ?? "новая (ID ещё нет)"],
-      ["State", c ? STATE_NAME[c.state] : "Новые"],
+      ["Заметка", `${this.ref.path}, строка ${this.ref.card.startLine + 1}`],
+      ["Карточка", this.ref.key ?? "новая (ID ещё нет)"],
+      ["Состояние", c ? STATE_NAME[c.state] : "Новые"],
       ["Первое повторение", fmtDate(s?.reviews[0]?.ts)],
       ["Последнее повторение", fmtDate(s?.reviews[s.reviews.length - 1]?.ts)],
       ["К сроку", c && c.state !== State.New ? fmtDate(c.due) : "—"],
       ["Интервал", c && c.state !== State.New ? formatInterval(c.due.getTime() - (c.last_review?.getTime() ?? now.getTime())) : "—"],
-      ["Stability", c && c.state !== State.New ? `${c.stability.toFixed(1)} дней` : "—"],
-      ["Difficulty", c && c.state !== State.New ? `${((c.difficulty / 10) * 100).toFixed(0)}%` : "—"],
+      ["Стабильность", c && c.state !== State.New ? `${c.stability.toFixed(1)} дней` : "—"],
+      ["Сложность", c && c.state !== State.New ? `${((c.difficulty / 10) * 100).toFixed(0)}%` : "—"],
       [
-        "Retrievability",
+        "Вероятность воспроизведения",
         c && c.state !== State.New ? `${(this.plugin.schedulerFor(this.ref).get_retrievability(c, now, false) * 100).toFixed(0)}%` : "—",
       ],
       ["Повторения", String(s?.reviews.length ?? 0)],
-      ["Lapses", String(c?.lapses ?? 0)],
+      ["Забывания", String(c?.lapses ?? 0)],
       [
         "Среднее время",
         s?.reviews.length ? `${(s.reviews.reduce((a, r) => a + r.ms, 0) / s.reviews.length / 1000).toFixed(1)}s` : "—",
       ],
     ];
-    if (s?.suspended) rows.push(["Приостановлены", "yes"]);
+    if (s?.suspended) rows.push(["Статус", "Приостановлена"]);
     const table = contentEl.createEl("table", { cls: "fc-info-table" });
     for (const [k, v] of rows) {
       const tr = table.createEl("tr");
@@ -116,14 +116,14 @@ export class CardInfoModal extends Modal {
       contentEl.createEl("h4", { text: "История" });
       const h = contentEl.createEl("table", { cls: "fc-info-history" });
       const head = h.createEl("tr");
-      for (const col of ["Date", "Type", "Rating", "Интервал", "Время", "Device"]) head.createEl("th", { text: col });
+      for (const col of ["Дата", "Тип", "Оценка", "Интервал", "Время", "Устройство"]) head.createEl("th", { text: col });
       for (const r of [...s.reviews].reverse()) {
         const tr = h.createEl("tr");
         tr.createEl("td", { text: fmtDate(r.ts) });
         tr.createEl("td", { text: STATE_NAME[r.stateBefore] === "Новые" ? "Изучение" : STATE_NAME[r.stateBefore] });
-        tr.createEl("td", { text: r.rating[0].toUpperCase() + r.rating.slice(1), cls: `fc-${r.rating}` });
+        tr.createEl("td", { text: ({ again: "Снова", hard: "Трудно", good: "Хорошо", easy: "Легко" }[r.rating] ?? r.rating), cls: `fc-${r.rating}` });
         tr.createEl("td", { text: formatInterval(r.due.getTime() - Date.parse(r.ts)) });
-        tr.createEl("td", { text: `${(r.ms / 1000).toFixed(1)}s` });
+        tr.createEl("td", { text: `${(r.ms / 1000).toFixed(1)} с` });
         tr.createEl("td", { text: r.device ?? "" });
       }
     }
@@ -180,7 +180,7 @@ export class SetDueModal extends Modal {
         });
         window.setTimeout(() => t.inputEl.focus(), 0);
       });
-    new Setting(contentEl).addButton((b) => b.setButtonText("Set").setCta().onClick(() => void apply()));
+    new Setting(contentEl).addButton((b) => b.setButtonText("Установить").setCta().onClick(() => void apply()));
   }
 
   onClose(): void {
