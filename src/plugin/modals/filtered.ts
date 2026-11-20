@@ -26,7 +26,7 @@ export class FilteredDeckModal extends Modal {
       ? { ...existing }
       : {
           id: newId(plugin),
-          name: `Фильтрованная колода ${plugin.settings.filteredDecks.length + 1}`,
+          name: `Отфильтрованная колода ${plugin.settings.filteredDecks.length + 1}`,
           search: "is:due",
           limit: 100,
           order: "random",
@@ -38,8 +38,8 @@ export class FilteredDeckModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     const editing = this.plugin.settings.filteredDecks.some((d) => d.id === this.def.id);
-    this.setTitle(editing ? `Фильтровальная колода: ${this.def.name}` : "Создать фильтрованную колоду");
-    new Setting(contentEl).setName("Name").addText((t) => t.setValue(this.def.name).onChange((v) => (this.def.name = v.trim() || this.def.name)));
+    this.setTitle(editing ? `Отфильтрованная колода: ${this.def.name}` : "Создать отфильтрованную колоду");
+    new Setting(contentEl).setName("Название").addText((t) => t.setValue(this.def.name).onChange((v) => (this.def.name = v.trim() || this.def.name)));
     const matchEl = contentEl.createDiv({ cls: "fc-muted fc-filtered-match" });
     const updateMatch = () => {
       const n = buildFiltered(this.plugin.items(null), { ...this.def, limit: Number.MAX_SAFE_INTEGER }, Date.now(), this.plugin.settings.dayStartHour, this.plugin.searchCtx).length;
@@ -134,7 +134,7 @@ export class CustomStudyModal extends Modal {
   private render(): void {
     const { contentEl } = this;
     contentEl.empty();
-    this.setTitle(`Своё занятие${this.deck ? `: ${this.deck.split("/").pop()}` : ""}`);
+    this.setTitle(`Выборочное изучение${this.deck ? `: ${this.deck.split("/").pop()}` : ""}`);
     const list = contentEl.createDiv({ cls: "fc-cs-kinds" });
     for (const [k, label] of KINDS) {
       const row = list.createEl("label", { cls: "fc-radio fc-cs-kind" });
@@ -189,8 +189,8 @@ export class CustomStudyModal extends Modal {
       return;
     }
     const made = customStudyDeck(deck, this.kind, this.n, { state: this.state, tags: this.tags, limit: this.n });
-    // Like Anki, Custom Study reuses one "Своё занятие" deck.
-    const existing = plugin.settings.filteredDecks.find((d) => d.name === made.name);
+    // Like Anki, Custom Study reuses one "Выборочное изучение" deck.
+    const existing = plugin.settings.filteredDecks.find((d) => (d.name === made.name || d.name === "Своё занятие"));
     const def: FilteredDeck = { ...made, id: existing?.id ?? newId(plugin) };
     const n = await plugin.buildFilteredDeck(def);
     this.close();
