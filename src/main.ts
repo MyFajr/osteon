@@ -174,13 +174,13 @@ export default class FlashcardsPlugin extends Plugin {
     this.addCommand({ id: "study-all", name: "Учить все колоды", callback: () => this.openReview(null) });
     this.addCommand({ id: "browse", name: "Обзор карточек", callback: () => this.openBrowse() });
     this.addCommand({ id: "stats", name: "Статистика", callback: () => this.openStats(null) });
-    this.addCommand({ id: "filtered-deck", name: "Создать фильтрованную колоду", callback: () => new FilteredDeckModal(this.app, this).open() });
-    this.addCommand({ id: "custom-study", name: "Своё занятие (все колоды)", callback: () => new CustomStudyModal(this.app, this, null).open() });
+    this.addCommand({ id: "filtered-deck", name: "Создать отфильтрованную колоду", callback: () => new FilteredDeckModal(this.app, this).open() });
+    this.addCommand({ id: "custom-study", name: "Выборочное изучение (все колоды)", callback: () => new CustomStudyModal(this.app, this, null).open() });
     this.addCommand({ id: "add-card", name: "Добавить карточку", callback: () => this.openAddCard(null) });
     this.addCommand({ id: "import-exam", name: "Импортировать результаты экзамена (пропущенные вопросы)…", callback: () => new ExamImportModal(this.app, this).open() });
     this.addCommand({ id: "open-misses", name: "Что не даётся", callback: () => this.openMisses() });
     this.addCommand({ id: "ai-helper", name: "Открыть ИИ-помощника (боковая панель)", callback: () => void this.openAssistant() });
-    this.addCommand({ id: "open-leeches", name: "Пиявки (карточки, которые я всё время забываю)", callback: () => this.openLeeches() });
+    this.addCommand({ id: "open-leeches", name: "Карточки, которые часто забываются", callback: () => this.openLeeches() });
     this.addCommand({ id: "open-weak", name: "Слабые места (карточки и темы, где я чаще всего ошибаюсь)", callback: () => this.openWeak() });
     this.addCommand({
       id: "reload-links",
