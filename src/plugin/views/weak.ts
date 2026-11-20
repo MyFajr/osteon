@@ -93,7 +93,7 @@ export class WeakView extends ItemView {
       el.createEl("h4", { text: "По темам" });
       const table = el.createEl("table", { cls: "fc-weak-topics" });
       const hr = table.createEl("tr");
-      for (const h of ["Topic", "Ответы", "Missed", "Доля промахов"]) hr.createEl("th", { text: h });
+      for (const h of ["Тема", "Ответы", "Ошибки", "Доля ошибок"]) hr.createEl("th", { text: h });
       for (const t of topics.slice(0, 15)) {
         const tr = table.createEl("tr", { cls: this.topic === t.topic ? "is-active" : "" });
         const a = tr.createEl("td").createEl("a", { text: t.topic, href: "#" });
