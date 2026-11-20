@@ -59,10 +59,10 @@ export class OcclusionEditorModal extends Modal {
 
   onOpen(): void {
     this.modalEl.addClass("fc-ioe-modal");
-    this.setTitle("Image occlusion");
+    this.setTitle("Скрытие изображения");
     const file = resolveImage(this.app, this.occ.image, this.sourcePath);
     if (!file) {
-      this.contentEl.createEl("p", { text: `Image not found: ${this.occ.image}` });
+      this.contentEl.createEl("p", { text: `Картинка не найдена: ${this.occ.image}` });
       return;
     }
     this.toolbar = this.contentEl.createDiv({ cls: "fc-ioe-toolbar" });
@@ -322,7 +322,7 @@ export class OcclusionEditorModal extends Modal {
   private group(): void {
     const ids = [...this.selected];
     if (ids.length < 2) {
-      new Notice("Select two or more boxes to group them (⇧-click, or tap boxes in Select mode).");
+      new Notice("Выберите две или более области, чтобы сгруппировать их (⇧-клик или касания в режиме выбора).");
       return;
     }
     this.snapshot();
@@ -361,7 +361,7 @@ export class OcclusionEditorModal extends Modal {
 
   private async save(): Promise<void> {
     if (!this.occ.masks.length) {
-      new Notice("Draw at least one box first.");
+      new Notice("Сначала нарисуйте хотя бы одну область.");
       return;
     }
     if (await this.onSave(structuredClone(this.occ))) {
@@ -402,23 +402,23 @@ export class OcclusionEditorModal extends Modal {
       setIcon(b, icon);
       b.onclick = fn;
     };
-    btn("mouse-pointer-2", "Select / move / pan (V)", () => this.setTool("select"), this.tool === "select");
-    btn("square", "Rectangle (R)", () => this.setTool("rect"), this.tool === "rect");
-    btn("circle", "Ellipse (O)", () => this.setTool("ellipse"), this.tool === "ellipse");
-    btn("pentagon", "Polygon (P): tap points, tap the first point or press Enter to close", () => this.setTool("poly"), this.tool === "poly");
+    btn("mouse-pointer-2", "Выбор / перемещение / панорама (V)", () => this.setTool("select"), this.tool === "select");
+    btn("square", "Прямоугольник (R)", () => this.setTool("rect"), this.tool === "rect");
+    btn("circle", "Эллипс (O)", () => this.setTool("ellipse"), this.tool === "ellipse");
+    btn("pentagon", "Полигон (P): расставляйте точки; замкнуть — клик по первой точке или Enter", () => this.setTool("poly"), this.tool === "poly");
     tb.createDiv({ cls: "fc-ioe-sep" });
-    btn("group", "Group selected (G)", () => this.group());
-    btn("ungroup", "Ungroup (⇧G)", () => this.ungroup());
-    btn("trash-2", "Delete selected (⌫)", () => this.deleteSelected());
+    btn("group", "Сгруппировать выбранное (G)", () => this.group());
+    btn("ungroup", "Разгруппировать (⇧G)", () => this.ungroup());
+    btn("trash-2", "Удалить выбранное (⌫)", () => this.deleteSelected());
     tb.createDiv({ cls: "fc-ioe-sep" });
-    btn("undo-2", "Undo (⌘Z)", () => this.undo());
-    btn("redo-2", "Redo (⌘⇧Z)", () => this.redo());
-    btn("zoom-out", "Zoom out", () => this.setZoom(this.zoom / 1.5));
-    btn("zoom-in", "Zoom in", () => this.setZoom(this.zoom * 1.5));
+    btn("undo-2", "Отменить (⌘Z)", () => this.undo());
+    btn("redo-2", "Повторить (⌘⇧Z)", () => this.redo());
+    btn("zoom-out", "Отдалить", () => this.setZoom(this.zoom / 1.5));
+    btn("zoom-in", "Приблизить", () => this.setZoom(this.zoom * 1.5));
     tb.createDiv({ cls: "fc-ioe-spacer" });
-    const cancel = tb.createEl("button", { text: "Cancel" });
+    const cancel = tb.createEl("button", { text: "Отмена" });
     cancel.onclick = () => this.close();
-    const save = tb.createEl("button", { text: "Save", cls: "mod-cta" });
+    const save = tb.createEl("button", { text: "Сохранить", cls: "mod-cta" });
     save.onclick = () => void this.save();
   }
 
@@ -434,17 +434,17 @@ export class OcclusionEditorModal extends Modal {
     const sb = this.sidebar;
     sb.empty();
     const mode = sb.createDiv({ cls: "fc-ioe-field" });
-    mode.createEl("label", { text: "Mode" });
+    mode.createEl("label", { text: "Режим" });
     const sel = mode.createEl("select", { cls: "dropdown" });
-    sel.createEl("option", { value: "hide-all", text: "Hide all, guess one" });
-    sel.createEl("option", { value: "hide-one", text: "Hide one, guess one" });
+    sel.createEl("option", { value: "hide-all", text: "Скрыть все, угадать один" });
+    sel.createEl("option", { value: "hide-one", text: "Скрыть один, угадать один" });
     sel.value = this.occ.mode;
     sel.onchange = () => {
       this.snapshot();
       this.occ.mode = sel.value as Occlusion["mode"];
     };
     const header = sb.createDiv({ cls: "fc-ioe-field" });
-    header.createEl("label", { text: "Header (shown above the figure)" });
+    header.createEl("label", { text: "Заголовок (над картинкой)" });
     const hi = header.createEl("input", { type: "text", value: this.occ.header ?? "" });
     // Write as you type: the sidebar is redrawn on every canvas change, which would drop an
     // uncommitted value.
@@ -453,7 +453,7 @@ export class OcclusionEditorModal extends Modal {
 
     const sel1 = this.selected.size === 1 ? this.mask([...this.selected][0]) : undefined;
     const label = sb.createDiv({ cls: "fc-ioe-field" });
-    label.createEl("label", { text: sel1 ? "Label for the selected box (optional)" : "Select one box to label it" });
+    label.createEl("label", { text: sel1 ? "Подпись выбранной области (необязательно)" : "Выберите одну область, чтобы подписать её" });
     const li = label.createEl("input", { type: "text", value: sel1?.label ?? "" });
     li.disabled = !sel1;
     li.onfocus = () => this.snapshot();
@@ -469,12 +469,12 @@ export class OcclusionEditorModal extends Modal {
     const cards = sb.createDiv({ cls: "fc-ioe-field" });
     const grouped = new Set(this.occ.groups.flatMap((g) => g.members));
     const n = this.occ.groups.length + this.occ.masks.filter((m) => !grouped.has(m.id)).length;
-    cards.createEl("label", { text: `${this.occ.masks.length} box${this.occ.masks.length === 1 ? "" : "es"} → ${n} card${n === 1 ? "" : "s"}` });
+    cards.createEl("label", { text: `Масок: ${this.occ.masks.length} → карточек: ${n}` });
     const ul = cards.createEl("ul", { cls: "fc-ioe-list" });
     for (const m of this.occ.masks) {
       const li2 = ul.createEl("li", { cls: this.selected.has(m.id) ? "is-selected" : "" });
       const g = this.groupOf(m.id);
-      li2.setText(`${m.label ?? "(no label)"}${g ? `  · group ${g}` : ""}`);
+      li2.setText(`${m.label ?? "(без подписи)"}${g ? `  · group ${g}` : ""}`);
       li2.onclick = () => {
         this.selected = new Set([m.id]);
         this.tool = "select";
@@ -484,7 +484,7 @@ export class OcclusionEditorModal extends Modal {
     }
     sb.createDiv({
       cls: "fc-muted fc-ioe-help",
-      text: "Drag to draw. Select mode: tap to select, ⇧-click to add, drag to move, drag corners to resize, drag empty space to pan.",
+      text: "Рисуйте перетаскиванием. Режим выбора: касание — выбрать, ⇧-клик — добавить к выбору, перетаскивание — переместить, тянуть углы — менять размер, пустое место — панорама.",
     });
   }
 
@@ -557,11 +557,11 @@ class DiscardModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Discard your changes to this figure?");
+    this.setTitle("Отменить ваши изменения этой картинки?");
     new Setting(this.contentEl)
-      .addButton((b) => b.setButtonText("Keep editing").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Продолжить правку").onClick(() => this.close()))
       .addButton((b) =>
-        b.setButtonText("Discard").setClass("mod-warning").onClick(() => {
+        b.setButtonText("Отбросить изменения").setClass("mod-warning").onClick(() => {
           this.close();
           this.onDiscard();
         }),

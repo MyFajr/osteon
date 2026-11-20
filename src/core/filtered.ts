@@ -11,12 +11,12 @@ import { compileSearch, type SearchContext } from "./search";
 export type FilteredOrder = "random" | "due" | "lapses" | "intervalAsc" | "intervalDesc" | "notes";
 
 export const FILTERED_ORDERS: Record<FilteredOrder, string> = {
-  random: "Random",
-  due: "Order due",
-  lapses: "Most lapses",
-  intervalAsc: "Increasing intervals",
-  intervalDesc: "Decreasing intervals",
-  notes: "Order in notes",
+  random: "В случайном порядке",
+  due: "По сроку повторения",
+  lapses: "Сначала часто забываемые",
+  intervalAsc: "По возрастанию интервала",
+  intervalDesc: "По убыванию интервала",
+  notes: "В порядке заметок",
 };
 
 export interface FilteredDeck {
@@ -109,7 +109,7 @@ export function customStudyDeck(
   opts: { state?: CustomStudyState; tags?: string; limit?: number } = {},
 ): Omit<FilteredDeck, "id"> {
   const scope = deck ? `deck:"${deck}" ` : "";
-  const name = "Custom Study Session";
+  const name = "Выборочное изучение";
   switch (kind) {
     case "forgotten":
       return { name, search: `${scope}rated:${n}:1`, limit: 9999, order: "random", reschedule: true };

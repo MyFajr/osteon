@@ -40,7 +40,7 @@ export class GamepadService {
     const p = this.plugin;
     p.registerDomEvent(window, "gamepadconnected", (e) => {
       if (!p.settings.gamepad.enabled) return;
-      new Notice(`Controller connected: ${(e).gamepad.id.replace(/\s*\(.*$/, "")}`);
+      new Notice(`Подключён контроллер: ${(e).gamepad.id.replace(/\s*\(.*$/, "")}`);
       this.loop();
     });
     p.registerDomEvent(window, "gamepaddisconnected", () => {
@@ -77,7 +77,7 @@ export class GamepadService {
     }
   }
 
-  /** Buttons pressed while the settings' "Press a button" tester is open go there instead. */
+  /** Buttons pressed while the settings' "Нажмите кнопку" tester is open go there instead. */
   listener: ((button: number) => void | Promise<void>) | null = null;
 
   private press(button: number): void {

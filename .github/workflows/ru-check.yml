@@ -1,0 +1,58 @@
+name: Russian branch validation
+
+on:
+  push:
+    branches:
+      - "vibe/russian-translation-05232a"
+  pull_request:
+    branches:
+      - "vibe/russian-translation-05232a"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out translation branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npm run typecheck
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Build production plugin
+        run: npm run build
+
+      - name: Verify installable plugin files
+        run: |
+          test -s main.js
+          test -s manifest.json
+          test -s styles.css
+          node -e "const m=require('./manifest.json'); if (!m.id || !m.version || m.isDesktopOnly) process.exit(1); console.log('Plugin manifest OK:', m.id, m.version)"
+
+      - name: Commit compiled plugin entry point to the translation branch
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f main.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build: update compiled Osteon plugin"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

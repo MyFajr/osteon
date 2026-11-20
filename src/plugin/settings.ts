@@ -10,38 +10,38 @@ import { AI_PROVIDERS, aiKeyId, isProvider, type AiProvider } from "../core/ai-p
 import { getSecret, setSecret, writeKeyFile } from "./secrets";
 
 export const ACTIONS = {
-  showAnswer: "Show answer",
-  again: "Again",
-  hard: "Hard",
-  good: "Good",
-  easy: "Easy",
-  undo: "Undo",
-  editCard: "Edit card",
-  openNote: "Open note",
-  aiHelper: "AI helper (side panel)",
-  mark: "Mark",
-  flag1: "Flag red",
-  flag2: "Flag orange",
-  flag3: "Flag green",
-  flag4: "Flag blue",
-  flag5: "Flag pink",
-  flag6: "Flag turquoise",
-  flag7: "Flag purple",
-  toggleMasks: "Toggle masks (image occlusion)",
-  revealNext: "Reveal next answer (one by one)",
-  revealAll: "Reveal or hide all answers (one by one)",
-  bury: "Bury card",
-  suspend: "Suspend card",
-  setDue: "Set due date",
-  cardInfo: "Card info",
-  deckOptions: "Deck options",
-  decks: "Go to decks (Anki: D)",
-  browse: "Browse (Anki: B)",
-  addCard: "Add card (Anki: A)",
-  stats: "Statistics, from the deck list (Anki: T)",
-  filteredDeck: "Create filtered deck, from the deck list (Anki: F)",
-  customStudy: "Custom study, from a deck's overview (Anki: C)",
-  close: "Close review",
+  showAnswer: "Показать ответ",
+  again: "Снова",
+  hard: "Трудно",
+  good: "Хорошо",
+  easy: "Легко",
+  undo: "Отменить",
+  editCard: "Изменить карточку",
+  openNote: "Открыть заметку",
+  aiHelper: "ИИ-помощник (боковая панель)",
+  mark: "Пометить",
+  flag1: "Красный флажок",
+  flag2: "Оранжевый флажок",
+  flag3: "Зелёный флажок",
+  flag4: "Синий флажок",
+  flag5: "Розовый флажок",
+  flag6: "Бирюзовый флажок",
+  flag7: "Фиолетовый флажок",
+  toggleMasks: "Переключать маски (скрытие изображений)",
+  revealNext: "Открыть следующий ответ (по одному)",
+  revealAll: "Открыть или скрыть все ответы (по одному)",
+  bury: "Отложить до завтра",
+  suspend: "Приостановить карточку",
+  setDue: "Задать срок",
+  cardInfo: "Информация о карточке",
+  deckOptions: "Параметры колоды",
+  decks: "К колодам (в Anki: D)",
+  browse: "Обзор (в Anki: B)",
+  addCard: "Добавить карточку (в Anki: A)",
+  stats: "Статистика из списка колод (в Anki: T)",
+  filteredDeck: "Создать отфильтрованную колоду из списка колод (в Anki: F)",
+  customStudy: "Выборочное изучение из обзора колоды (в Anki: C)",
+  close: "Закрыть занятие",
 } as const;
 export type ActionName = keyof typeof ACTIONS;
 
@@ -83,23 +83,23 @@ export const DEFAULT_KEYS: Record<ActionName, string[]> = {
 
 /** What shows for a moment after an answer (review screen). */
 export const ANSWER_FEEDBACK = {
-  off: "Nothing",
-  line: "Thin coloured line",
-  dot: "Coloured dot",
-  word: "Small word",
-  pill: "Bold label",
+  off: "Ничего",
+  line: "Тонкая цветная линия",
+  dot: "Цветная точка",
+  word: "Мелкое слово",
+  pill: "Жирная подпись",
 } as const;
 export type AnswerFeedback = keyof typeof ANSWER_FEEDBACK;
 
 export type CardTheme = "obsidian" | "anki" | "anking" | "paper" | "contrast" | "image";
 
 export const CARD_THEMES: Record<CardTheme, string> = {
-  obsidian: "Match my Obsidian theme",
+  obsidian: "Как в теме Obsidian",
   anki: "Anki Classic",
   anking: "AnKing",
-  paper: "Paper (sepia)",
-  contrast: "High contrast",
-  image: "Background image",
+  paper: "Бумага (сепия)",
+  contrast: "Высокий контраст",
+  image: "Фоновая картинка",
 };
 
 export interface HoverSettings {
@@ -157,15 +157,15 @@ export interface FlashcardsSettings {
   crownOverrides: Record<string, boolean>;
   /** Leeches dealt with on the Leeches screen: card key → its lapses then. */
   leechDone: Record<string, number>;
-  /** Filtered decks (spec 0008), including Custom Study's "Custom Study Session". */
+  /** Filtered decks (spec 0008), including Custom Study's "Своё занятие". */
   filteredDecks: FilteredDeck[];
-  /** Decks kept off the deck list and out of "Study all" (lower-cased paths); their cards stay. */
+  /** Decks kept off the deck list and out of "Учить всё" (lower-cased paths); their cards stay. */
   hiddenDecks: string[];
   /** Deck renames (Anki's Rename), applied in order to the names notes give their cards. */
   deckRenames: DeckRename[];
   /** Notes the student linked to a card by hand: card id → note paths (N opens the first). */
   cardNotes: Record<string, string[]>;
-  /** Custom Study "increase today's limit": lower-cased deck → extra cards for one study day. */
+  /** Custom Study "увеличить сегодняшний лимит": lower-cased deck → extra cards for one study day. */
   todayExtra: Record<string, { day: number; newExtra: number; reviewExtra: number }>;
   fontSize: number;
   /** Game controller (spec 0010, like Anki's Contanki add-on). */
@@ -469,36 +469,36 @@ export class FlashcardsSettingTab extends PluginSettingTab {
     const s = this.plugin.settings;
     return [
       {
-        name: "Use a game controller",
-        desc: "Like Anki's Contanki add-on (e.g. an 8BitDo Micro in controller mode). The buttons start with your Anki 8BitDo Micro setup.",
+        name: "Использовать геймпад",
+        desc: "Как в дополнении Contanki для Anki (например 8BitDo Micro в режиме геймпада). Кнопки сначала настроены под ваш профиль Anki 8BitDo Micro.",
         control: { type: "toggle", key: "gamepad.enabled" },
       },
       {
-        name: "Which button is which?",
-        desc: "Press Test, then a controller button, to see its number.",
+        name: "Какая кнопка за что отвечает?",
+        desc: "Нажмите «Проверить», затем кнопку на геймпаде, чтобы увидеть её номер.",
         render: (setting) => {
           setting.addButton((b) =>
-            b.setButtonText("Test").onClick(() => {
-              b.setButtonText("Press a button…");
+            b.setButtonText("Проверить").onClick(() => {
+              b.setButtonText("Нажмите кнопку…");
               this.plugin.gamepad.listener = (n) => {
                 this.plugin.gamepad.listener = null;
-                const dir = { 100: " (left)", 101: " (right)", 102: " (up)", 103: " (down)" }[n as 100] ?? "";
-                b.setButtonText(`Button ${n}${dir}`);
+                const dir = { 100: " (влево)", 101: " (вправо)", 102: " (вверх)", 103: " (вниз)" }[n as 100] ?? "";
+                b.setButtonText(`Кнопка ${n}${dir}`);
               };
             }),
           );
         },
       },
       {
-        name: "Buttons",
-        desc: "What each controller button does on the question side, the answer side and the deck list.",
+        name: "Кнопки",
+        desc: "Что делает каждая кнопка геймпада на стороне вопроса, стороне ответа и в списке колод.",
         render: (setting) => {
           setting.settingEl.addClass("fc-setting-stack");
           const table = setting.settingEl.createEl("table", { cls: "fc-pad-table fc-setting-wide" });
           const draw = () => {
             table.empty();
             const head = table.createEl("tr");
-            for (const h of ["Button", "Question side", "Answer side", "Deck list"]) head.createEl("th", { text: h });
+            for (const h of ["Кнопка", "Сторона вопроса", "Сторона ответа", "Список колод"]) head.createEl("th", { text: h });
             const b = s.gamepad.bindings;
             const buttons = new Set<number>();
             for (const ctx of ["question", "answer", "review", "decks", "all"] as const) for (const k of Object.keys(b[ctx])) buttons.add(Number(k));
@@ -521,19 +521,19 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           draw();
           setting
             .addButton((btn) =>
-              btn.setButtonText("Add a button").onClick(() => {
-                btn.setButtonText("Press it on the controller…");
+              btn.setButtonText("Добавить кнопку").onClick(() => {
+                btn.setButtonText("Нажмите её на геймпаде…");
                 this.plugin.gamepad.listener = async (n) => {
                   this.plugin.gamepad.listener = null;
                   s.gamepad.bindings.all[String(n)] ??= "";
                   await save();
-                  btn.setButtonText("Add a button");
+                  btn.setButtonText("Добавить кнопку");
                   draw();
                 };
               }),
             )
             .addButton((btn) =>
-              btn.setButtonText("Reset to my 8BitDo Micro setup").onClick(async () => {
+              btn.setButtonText("Вернуть мой профиль 8BitDo Micro").onClick(async () => {
                 s.gamepad.bindings = structuredClone(DEFAULT_PAD_BINDINGS);
                 await save();
                 draw();
@@ -552,8 +552,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
     const picture = () => s.cardTheme === "image";
     return [
       {
-        name: "Card theme",
-        desc: "How cards look while you review. The sample below updates as you choose.",
+        name: "Тема карточек",
+        desc: "Как выглядят карточки во время занятия. Образец ниже обновляется сразу же.",
         render: (setting) => {
           setting.addDropdown((d) => {
             for (const [k, label] of Object.entries(CARD_THEMES)) d.addOption(k, label);
@@ -567,8 +567,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         },
       },
       {
-        name: "Background picture",
-        desc: "A picture in your vault, e.g. Attachments/Background.jpg",
+        name: "Фоновое изображение",
+        desc: "Картинка из хранилища, например Attachments/Background.jpg",
         visible: picture,
         render: (setting) => {
           setting.addText((t) =>
@@ -581,8 +581,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         },
       },
       {
-        name: "Dim the picture",
-        desc: "Darker keeps the text readable.",
+        name: "Затемнить картинку",
+        desc: "Затемнение сохраняет читаемость текста.",
         visible: picture,
         render: (setting) => {
           // Obsidian 1.13 shows the value beside the slider; before that it is written out here.
@@ -601,7 +601,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         },
       },
       {
-        name: "Sample card",
+        name: "Пример карточки",
         searchable: false,
         render: (setting) => {
           setting.settingEl.addClass("fc-setting-stack");
@@ -642,15 +642,15 @@ export class FlashcardsSettingTab extends PluginSettingTab {
 
     const decks: Section = {
       type: "group",
-      heading: "Decks",
+      heading: "Колоды",
       items: [
         {
           name: "Presets",
           desc:
-            "Daily limits, learning steps, desired retention and more live in presets, as in Anki. " +
-            "Open a deck's options from the gear icon in the deck list; this edits the Default preset.",
+            "Дневные лимиты, шаги изучения, желаемое удержание и другое живут в пресетах, как в Anki. " +
+            "Параметры колоды открываются по иконке шестерёнки в списке колод; здесь редактируется пресет Default.",
           render: (setting) => {
-            setting.addButton((b) => b.setButtonText("Edit Default preset").onClick(() => new DeckOptionsModal(this.app, this.plugin, null).open()));
+            setting.addButton((b) => b.setButtonText("Изменить пресет Default").onClick(() => new DeckOptionsModal(this.app, this.plugin, null).open()));
           },
         },
       ],
@@ -658,12 +658,12 @@ export class FlashcardsSettingTab extends PluginSettingTab {
 
     const cards: Section = {
       type: "group",
-      heading: "Cards",
+      heading: "Карточки",
       items: [
         // Folder settings re-scan the vault, so they apply when the field loses focus, not per keystroke.
         {
-          name: "Card folders",
-          desc: "Notes tagged #flashcards are always scanned. Also scan every note in these folders (comma-separated).",
+          name: "Папки карточек",
+          desc: "Заметки с тегом #flashcards сканируются всегда. Также сканировать каждую заметку в этих папках (через запятую).",
           render: (setting) => {
             setting.addText((t) => {
               t.setValue(s.cardFolders.join(", "));
@@ -675,17 +675,17 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "Review data folder",
+          name: "Папка данных занятия",
           desc:
-            "Where review history is kept (one sub-folder per device). Must not start with a dot, so it syncs. " +
-            "Changing it does not move existing history: move the old folder in the file explorer first.",
+            "Где хранится история повторений (подпапка на каждое устройство). Не должно начинаться с точки, чтобы синхронизироваться. " +
+            "Смена папки не переносит существующую историю: сначала перенесите старую папку в проводнике файлов.",
           render: (setting) => {
             setting.addText((t) => {
               t.setValue(s.stateFolder);
               onChange(t.inputEl, async () => {
                 const folder = t.getValue().trim().replace(/^\/+|\/+$/g, "");
                 if (!folder || folder.startsWith(".")) {
-                  new Notice("The review data folder can't be empty or start with a dot.");
+                  new Notice("Папка данных повторений не может быть пустой или начинаться с точки.");
                   t.setValue(s.stateFolder);
                   return;
                 }
@@ -694,57 +694,57 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 s.stateFolder = folder;
                 await this.plugin.applyFolderSettings();
                 if (this.app.vault.getAbstractFileByPath(`${old}/reviews`)) {
-                  new Notice(`Review history in "${old}/reviews" is no longer loaded. Move it into "${folder}/" to keep it.`, 10000);
+                  new Notice(`История повторений в «${old}/reviews» больше не читается. Переместите её в «${folder}/», чтобы сохранить.`, 10000);
                 }
               });
             });
           },
         },
-        toggle("Tag missed exam topics", "When you import exam results, add weak-area-nbme (or -cms, -amboss…) to the missed topics' notes.", "tagExamMisses"),
+        toggle("Помечать пропущенные темы экзаменов", "При импорте результатов экзаменов тег weak-area-nbme (или -cms, -amboss…) добавляется к заметкам с пропущенными темами.", "tagExamMisses"),
       ],
     };
 
     const review: Section = {
       type: "group",
-      heading: "Review",
+      heading: "Повторение",
       items: [
-        toggle("Show intervals on buttons", "", "showIntervals"),
-        toggle("Show remaining card count", "", "showRemaining"),
-        toggle("Show the review heatmap under the deck list", "Like Anki's Review Heatmap add-on. The full graphs are under Statistics.", "showHeatmap"),
+        toggle("Показывать интервалы на кнопках", "", "showIntervals"),
+        toggle("Показывать оставшееся число карточек", "", "showRemaining"),
+        toggle("Показывать тепловую карту повторений под списком колод", "Как дополнение Review Heatmap для Anki. Полные графики — в разделе «Статистика».", "showHeatmap"),
         num(
-          "Reveal answers one by one (🦴)",
-          "When a card asks for at least this many answers, the back hides each one as 🦴 (a list on separate lines inside one cloze counts as several answers). N reveals the next, a click reveals that one, comma reveals all. 0 turns it off. The bone button above a card switches that one card on or off.",
+          "Открывать ответы по одному (🦴)",
+          "Когда карточка требует хотя бы столько ответов, оборот прячет каждый из них за 🦴 (список отдельными строками внутри одного cloze считается несколькими ответами). N открывает следующий, клик — тот же, запятая — все. 0 выключает. Костяная кнопка над карточкой включает это только для неё.",
           () => s.oneByOneMin,
           (v) => (s.oneByOneMin = v),
           (v) => Number.isInteger(v) && v >= 0,
         ),
         toggle(
-          "Adaptive new cards",
-          "Hold new cards back while you are still relearning a lot of cards today, and bring them back as you clear them. Off: new cards follow each deck's daily limit only, as in Anki.",
+          "Адаптивные новые карточки",
+          "Придерживает новые карточки, пока вы дорабатываете много карточек в изучении сегодня, и возвращает их по мере разбора. Выкл.: новые карточки подчиняются только дневному лимиту своей колоды, как в Anki.",
           "adaptiveNew",
         ),
         num(
-          "Adaptive new cards: pause above this many cards in learning",
-          "Only used when Adaptive new cards is on. Default: 20.",
+          "Адаптивные новые: ставить на паузу, если карточек в изучении больше этого числа",
+          "Используется только при включённой опции «Адаптивные новые карточки». По умолчанию: 20.",
           () => s.adaptiveNewPile,
           (v) => (s.adaptiveNewPile = v),
           (v) => Number.isInteger(v) && v > 0,
         ),
         num(
-          "Rest a card after this many misses in one day",
-          "After this many Again answers in a day, the card waits until tomorrow instead of coming round again, and shows under Weak spots on the deck list. 0 turns it off (Anki keeps repeating).",
+          "Уводить карточку на отдых после стольких промахов за день",
+          "После стольких ответов «Снова» за день карточка уходит до завтра вместо повторения и попадает в «Слабые места» в списке колод. 0 — выключить (в Anki повторяется без конца).",
           () => s.restAfterMisses,
           (v) => (s.restAfterMisses = v),
           (v) => Number.isInteger(v) && v >= 0,
         ),
         toggle(
-          "Warn when pictures aren't downloaded",
-          "When Osteon starts, it reads a few pictures to check they are on this device. iCloud can offload them from a phone, which makes cards and notes with pictures hang.",
+          "Предупреждать, если картинки не скачаны",
+          "При запуске Osteon читает несколько картинок, чтобы проверить, что они на этом устройстве. iCloud может выгрузить их с телефона, из-за чего карточки и заметки с картинками подвисают.",
           "checkDownloads",
         ),
         {
-          name: "Shortcut note",
-          desc: "Opening this note opens the deck list instead. Bookmark it, or point an Obsidian home-screen widget at it, to get to your cards in one tap. Give a path such as “Flashcards.md”; leave empty to turn this off (do that to edit the note itself).",
+          name: "Заметка-ярлык",
+          desc: "Открытие этой заметки вместо этого открывает список колод. Добавьте её в закладки или нацельте виджет Obsidian на домашнем экране на неё, чтобы попадать к карточкам в одно касание. Укажите путь вида «Flashcards.md»; оставьте пустым, чтобы отключить (так стоит сделать, чтобы править саму заметку).",
           render: (setting) => {
             setting
               .addText((t) =>
@@ -757,20 +757,20 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                   }),
               )
               .addButton((b) =>
-                b.setButtonText("Create the note").onClick(async () => {
+                b.setButtonText("Создать заметку").onClick(async () => {
                   const path = normalizePath(/\.md$/i.test(s.homeNote) ? s.homeNote : `${s.homeNote || "Flashcards"}.md`);
                   s.homeNote = path;
                   await save();
                   if (!this.app.vault.getAbstractFileByPath(path)) {
-                    await this.app.vault.create(path, "This note is a shortcut: opening it opens the Osteon deck list.\nTo change that, see Settings → Osteon → Shortcut note.\n");
+                    await this.app.vault.create(path, "Эта заметка — ярлык: открытие показывает список колод Osteon.\nОтменить это можно в Настройки → Osteon → Заметка-ярлык.\n");
                   }
-                  new Notice(`Shortcut note: ${path}`);
+                  new Notice(`Заметка-ярлык: ${path}`);
                   this.redraw();
                 }),
               );
           },
         },
-        num("Card font size (px)", "", () => s.fontSize, (v) => (s.fontSize = v), (v) => v >= 10 && v <= 48),
+        num("Размер шрифта карточек (px)", "", () => s.fontSize, (v) => (s.fontSize = v), (v) => v >= 10 && v <= 48),
         ...this.themeRows(save),
       ],
     };
@@ -778,30 +778,30 @@ export class FlashcardsSettingTab extends PluginSettingTab {
     // The phone and timing rows have always followed the controller's, under its heading.
     const controller: Section = {
       type: "group",
-      heading: "Game controller",
+      heading: "Геймпад",
       items: [
         ...this.gamepadRows(save),
         toggle(
-          "Tap to answer (phone)",
-          "On the answer side, tap the right third of the screen for Good and the left third for Again, like AnkiMobile. On one-by-one cards the right side reveals the next answer first.",
+          "Отвечать касанием (телефон)",
+          "На стороне ответа правая треть экрана значит «Хорошо», левая треть — «Снова», как в AnkiMobile. На карточках с показом по одному правая часть сначала открывает следующий ответ.",
           "tapToAnswer",
         ),
         {
-          name: "Show what you answered",
-          desc: "After each answer, a brief sign just above the answer buttons shows that the key or tap registered and which answer it was (red Again, grey Hard, green Good, blue Easy).",
+          name: "Показывать, какой ответ дан",
+          desc: "После каждого ответа короткий знак над кнопками подтверждает, что нажатие или касание зарегистрировано, и показывает, каким ответ он был (красный — «Снова», серый — «Трудно», зелёный — «Хорошо», синий — «Легко»).",
           control: { type: "dropdown", key: "answerFeedback", options: ANSWER_FEEDBACK },
         },
-        toggle("Shake to undo (phone)", "Shake the phone to undo the last answer, like AnkiMobile. iOS asks for motion access the first time.", "shakeToUndo"),
-        num("Next day starts at (hour)", "Anki default: 4 (4 am)", () => s.dayStartHour, (v) => (s.dayStartHour = v), (v) => Number.isInteger(v) && v >= 0 && v <= 23),
-        num("Learn-ahead limit (minutes)", "Anki default: 20", () => s.learnAheadMins, (v) => (s.learnAheadMins = v), (v) => v >= 0),
+        toggle("Встряхнуть для отмены (телефон)", "Встряхните телефон, чтобы отменить последний ответ, как в AnkiMobile. iOS при первом запуске запросит доступ к датчикам движения.", "shakeToUndo"),
+        num("Следующий день начинается в (час)", "В Anki по умолчанию: 4 (4 утра)", () => s.dayStartHour, (v) => (s.dayStartHour = v), (v) => Number.isInteger(v) && v >= 0 && v <= 23),
+        num("Предел изучения вперёд (минуты)", "В Anki по умолчанию: 20", () => s.learnAheadMins, (v) => (s.learnAheadMins = v), (v) => v >= 0),
       ],
     };
 
     const keys: Section = {
       type: "group",
-      heading: "Review keys",
+      heading: "Клавиши занятия",
       items: [
-        { name: "Separate several keys with commas", desc: "Examples: 1, Space, Enter, Mod+z (Cmd or Ctrl), Mod+Shift+D, Escape." },
+        { name: "Несколько клавиш разделяйте запятыми", desc: "Примеры: 1, Space, Enter, Mod+z (Cmd или Ctrl), Mod+Shift+D, Escape." },
         ...(Object.keys(ACTIONS) as ActionName[]).map(
           (action): Row => ({
             name: ACTIONS[action],
@@ -819,10 +819,10 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           }),
         ),
         {
-          name: "Reset keys to Anki defaults",
+          name: "Сбросить клавиши к значениям Anki",
           render: (setting) => {
             setting.addButton((b) =>
-              b.setButtonText("Reset").onClick(async () => {
+              b.setButtonText("Сбросить").onClick(async () => {
                 s.keys = { ...DEFAULT_KEYS };
                 await save();
                 this.redraw();
@@ -833,21 +833,21 @@ export class FlashcardsSettingTab extends PluginSettingTab {
       ],
     };
 
-    const meshDesc = "The U.S. National Library of Medicine's medical vocabulary, free with attribution. Downloaded once per device (about 30 MB) and kept on the device, not in the vault.";
+    const meshDesc = "Медицинский словарь Национальной библиотеки медицины США, бесплатен с указанием источника. Скачивается один раз на устройство (около 30 МБ) и хранится на устройстве, а не в хранилище.";
     const hover: Section = {
       type: "group",
-      heading: "Medical-term hover",
+      heading: "Подсказки медицинских терминов",
       items: [
         {
-          name: "Underline terms",
-          desc: "Terms on the card are underlined; hover (Mac) or tap (iPhone) for a definition. 'Hard terms only' works like AMBOSS: basic words like pelvis or fracture aren't underlined. Your own notes' titles always are.",
+          name: "Подчёркивать термины",
+          desc: "Термины на карточке подчёркиваются; наведите курсор (Mac) или коснитесь (iPhone), чтобы увидеть определение. Режим «Только сложные термины» работает как в AMBOSS: простые слова вроде pelvis или fracture не подчёркиваются. Заголовки ваших заметок подчёркиваются всегда.",
           render: (setting) => {
             setting.addDropdown((d) =>
               d
-                .addOption("strict", "Hard terms only (like AMBOSS)")
-                .addOption("uncommon", "Uncommon words")
-                .addOption("all", "All medical terms")
-                .addOption("off", "Off")
+                .addOption("strict", "Только сложные термины (как в AMBOSS)")
+                .addOption("uncommon", "Редкие слова")
+                .addOption("all", "Все медицинские термины")
+                .addOption("off", "Выкл.")
                 .setValue(s.hover.sensitivity)
                 .onChange(async (v) => {
                   s.hover.sensitivity = v as typeof s.hover.sensitivity;
@@ -857,11 +857,11 @@ export class FlashcardsSettingTab extends PluginSettingTab {
             );
           },
         },
-        toggle("Also on the front of cards", "Off by default: a definition can give away the answer.", "hover.onFront"),
-        toggle("Also in notes (reading view)", "", "hover.inNotes"),
+        toggle("Также на лицевой стороне карточек", "По умолчанию выключено: определение может подсказать ответ.", "hover.onFront"),
+        toggle("Также в заметках (режим чтения)", "", "hover.inNotes"),
         {
-          name: "Use my notes",
-          desc: "A note whose title or alias matches a term gives the definition (its first paragraph and pictures).",
+          name: "Использовать мои заметки",
+          desc: "Заметка, чей заголовок или псевдоним совпадает с термином, даёт определение (первый абзац и картинки).",
           render: (setting) => {
             setting.addToggle((t) =>
               t.setValue(s.hover.useNotes).onChange(async (v) => {
@@ -873,14 +873,14 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "My terms list",
-          desc: "Your own definitions and a never-underline list.",
+          name: "Список «Мои термины»",
+          desc: "Ваши собственные определения и список слов без подчёркивания.",
           render: (setting) => {
-            setting.setDesc(`Your own definitions and a never-underline list: ${s.stateFolder}/glossary/My terms.md`).addButton((b) => b.setButtonText("Open").onClick(() => void this.plugin.terms.openMyTerms()));
+            setting.setDesc(`Ваши собственные определения и список слов без подчёркивания: ${s.stateFolder}/glossary/My terms.md`).addButton((b) => b.setButtonText("Открыть").onClick(() => void this.plugin.terms.openMyTerms()));
           },
         },
         {
-          name: "MeSH dictionary",
+          name: "Словарь MeSH",
           desc: meshDesc,
           render: (setting) => {
             setting
@@ -893,7 +893,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 }),
               )
               .addButton((b) =>
-                b.setButtonText(this.plugin.terms.hasMesh() ? "Update" : "Download").onClick(async () => {
+                b.setButtonText(this.plugin.terms.hasMesh() ? "Обновить" : "Скачать").onClick(async () => {
                   b.setDisabled(true);
                   await this.plugin.terms.downloadMesh();
                   this.redraw();
@@ -904,21 +904,21 @@ export class FlashcardsSettingTab extends PluginSettingTab {
       ],
     };
 
-    const modelDesc = "The model's name exactly as your provider lists it. A small, inexpensive model is enough for definitions.";
+    const modelDesc = "Название модели точно как у вашего провайдера. Для определений терминов хватает небольшой недорогой модели.";
     const ai: Section = {
       type: "group",
-      heading: "AI helpers",
+      heading: "ИИ-помощники",
       items: [
         {
           name: "Optional",
           desc:
-            "Uses your own API key from the provider you choose (billed by that provider), or a model running on your own computer. " +
-            "When on, card text is sent to that provider to find hard terms and write short definitions (cached in the vault, " +
-            "so each card is looked at once), to explain cards you keep missing, and to suggest splits for overstuffed cards.",
+            "Используется ваш собственный ключ API от выбранного провайдера (оплачивается ему) или модель на вашем же компьютере. " +
+            "Когда включено, текст карточек отправляется выбранному провайдеру, чтобы находить сложные термины и составлять краткие определения (кэш хранится в хранилище, " +
+            "чтобы каждую карточку смотрели один раз), объяснять карточки, которые вы постоянно забываете, и предлагать разбиения перегруженных карточек.",
         },
         {
           name: "Provider",
-          desc: "Each provider keeps its own key. “Other” works with any service that accepts OpenAI-style requests, including Ollama and LM Studio.",
+          desc: "У каждого провайдера свой ключ. «Другой» работает с любым сервисом, принимающим запросы в формате OpenAI, включая Ollama и LM Studio.",
           render: (setting) => {
             setting.addDropdown((d) => {
               for (const [id, p] of Object.entries(AI_PROVIDERS)) d.addOption(id, p.label);
@@ -934,8 +934,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "Server address",
-          desc: "The base address of the service, e.g. http://localhost:11434/v1 for Ollama.",
+          name: "Адрес сервера",
+          desc: "Базовый адрес сервиса, например http://localhost:11434/v1 для Ollama.",
           visible: () => s.ai.provider === "custom",
           render: (setting) => {
             setting.addText((t) => {
@@ -948,12 +948,12 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "API key",
-          desc: "Stored on this device only, never in the vault, unless “Sync the key to my other devices” below is on.",
+          name: "Ключ API",
+          desc: "Хранится только на этом устройстве и никогда в хранилище, если не включена опция «Синхронизировать ключ с моими другими устройствами» ниже.",
           render: (setting) => {
             setting.addText((t) => {
               t.inputEl.type = "password";
-              const placeholder = () => (getSecret(this.app, keyId()) ? "•••••••• (saved)" : AI_PROVIDERS[s.ai.provider].keyHint);
+              const placeholder = () => (getSecret(this.app, keyId()) ? "•••••••• (сохранено)" : AI_PROVIDERS[s.ai.provider].keyHint);
               t.setPlaceholder(placeholder());
               t.inputEl.addEventListener("change", () => {
                 setSecret(this.app, keyId(), t.getValue().trim());
@@ -961,31 +961,31 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 t.setPlaceholder(placeholder());
                 const key = getSecret(this.app, keyId());
                 if (s.ai.syncKey) void writeKeyFile(this.app, this.plugin.manifest.dir ?? "", key);
-                new Notice(key ? (s.ai.syncKey ? "API key saved, and synced to your other devices." : "API key saved on this device.") : "API key removed.");
+                new Notice(key ? (s.ai.syncKey ? "Ключ API сохранён и синхронизирован с вашими другими устройствами." : "Ключ API сохранён на этом устройстве.") : "Ключ API удалён.");
               });
             });
           },
         },
         {
-          name: "Sync the key to my other devices",
+          name: "Синхронизировать ключ с моими другими устройствами",
           desc:
-            "Keeps a copy of the key in a file in this vault's plugin folder, so your phone or second computer picks it up without typing it. " +
-            "Anyone who gets a copy of the vault's hidden settings folder gets the key too, so leave this off for a vault you share. Turning it off deletes the file.",
+            "Хранит копию ключа в файле в папке плагина хранилища, чтобы телефон или второй компьютер подхватили его без ввода. " +
+            "Тот, кто получит копию скрытой папки настроек хранилища, получит и ключ, так что для общего хранилища держите выключенным. Выключение удаляет файл.",
           render: (setting) => {
             setting.addToggle((t) =>
               t.setValue(s.ai.syncKey).onChange(async (v) => {
                 s.ai.syncKey = v;
                 await save();
                 await writeKeyFile(this.app, this.plugin.manifest.dir ?? "", v ? getSecret(this.app, keyId()) : "");
-                if (v && !getSecret(this.app, keyId())) new Notice("Enter the key on this device, or wait for it to arrive from another one.");
+                if (v && !getSecret(this.app, keyId())) new Notice("Введите ключ на этом устройстве или подождите, пока он придёт с другого.");
               }),
             );
           },
         },
-        toggle("Use AI", "", "ai.enabled"),
+        toggle("Использовать ИИ", "", "ai.enabled"),
         {
-          name: "Model",
-          desc: "Opus 5 is the most capable; Haiku 4.5 costs about a fifth as much.",
+          name: "Модель",
+          desc: "Opus 5 — самый способный; Haiku 4.5 обходится примерно в пять раз дешевле.",
           visible: () => s.ai.provider === "anthropic",
           control: {
             type: "dropdown",
@@ -994,13 +994,13 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "Model",
+          name: "Модель",
           desc: modelDesc,
           visible: () => s.ai.provider !== "anthropic",
           render: (setting) => {
-            if (!s.ai.otherModel.trim()) setting.setDesc(`Needed before the AI helpers can run. ${modelDesc}`);
+            if (!s.ai.otherModel.trim()) setting.setDesc(`Нужно, чтобы ИИ-помощники работали. ${modelDesc}`);
             setting.addText((t) => {
-              t.setPlaceholder("Model name").setValue(s.ai.otherModel);
+              t.setPlaceholder("Название модели").setValue(s.ai.otherModel);
               onChange(t.inputEl, async () => {
                 s.ai.otherModel = t.getValue().trim();
                 await save();
@@ -1009,8 +1009,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
           },
         },
         {
-          name: "Never send cards from these folders",
-          desc: "Comma-separated.",
+          name: "Никогда не отправлять карточки из этих папок",
+          desc: "Перечислите папки через запятую.",
           render: (setting) => {
             setting.addText((t) => {
               t.setValue(s.ai.excludeFolders.join(", "));
@@ -1021,17 +1021,17 @@ export class FlashcardsSettingTab extends PluginSettingTab {
             });
           },
         },
-        toggle("Look at new cards automatically", "In small batches (up to 30 cards) while Obsidian is open. Larger runs always ask first.", "ai.autoRun"),
+        toggle("Показывать новые карточки автоматически", "Небольшими партиями (до 30 карточек), пока Obsidian открыт. Для больших прогонов всегда запрашивается подтверждение.", "ai.autoRun"),
         {
-          name: "Find hard terms now",
+          name: "Найти сложные термины сейчас",
           render: (setting) => {
-            setting.setDesc(this.plugin.ai.statusText()).addButton((b) => b.setButtonText("Run").onClick(() => void this.plugin.ai.runWithConfirm()));
+            setting.setDesc(this.plugin.ai.statusText()).addButton((b) => b.setButtonText("Запустить").onClick(() => void this.plugin.ai.runWithConfirm()));
           },
         },
       ],
     };
 
-    return [decks, cards, review, controller, keys, hover, ai, { name: "Installed version", desc: this.plugin.manifest.version, searchable: false }];
+    return [decks, cards, review, controller, keys, hover, ai, { name: "Установленная версия", desc: this.plugin.manifest.version, searchable: false }];
   }
 }
 
@@ -1053,14 +1053,14 @@ export function renderThemeSample(app: App, el: HTMLElement, s: FlashcardsSettin
   const card = root.createDiv({ cls: "fc-card" });
   card.style.fontSize = `${Math.round(s.fontSize * 0.85)}px`;
   const q = card.createDiv({ cls: "fc-question markdown-rendered" });
-  q.appendText("The ACL originates on the ");
+  q.appendText("Собственная связка ACL начинается на ");
   q.createSpan({ cls: "fc-cloze", text: "[...]" });
   q.appendText(".");
   card.createEl("hr", { cls: "fc-answer-rule" });
   const a = card.createDiv({ cls: "fc-question markdown-rendered" });
-  a.appendText("The ACL originates on the ");
-  a.createEl("mark", { text: "lateral femoral condyle" });
+  a.appendText("Собственная связка ACL начинается на ");
+  a.createEl("mark", { text: "латеральном мыщелке бедренной кости" });
   a.appendText(".");
-  card.createDiv({ cls: "fc-extra", text: "Posterior part of the notch wall, behind the resident's ridge." });
+  card.createDiv({ cls: "fc-extra", text: "Задняя часть стенки межмыщелковой вырезки, позади гребня головки бедра (resident's ridge)." });
   applyCardTheme(app, root, card, s);
 }

@@ -50,8 +50,8 @@ export class ImageViewer extends Modal {
     this.captionEl = bar.createDiv({ cls: "fc-lightbox-caption" });
     this.countEl = bar.createDiv({ cls: "fc-lightbox-count" });
     if (this.pictures.length > 1) {
-      this.navButton("chevron-left", "Previous picture (←)", "fc-lightbox-prev", -1);
-      this.navButton("chevron-right", "Next picture (→)", "fc-lightbox-next", 1);
+      this.navButton("chevron-left", "Предыдущая картинка (←)", "fc-lightbox-prev", -1);
+      this.navButton("chevron-right", "Следующая картинка (→)", "fc-lightbox-next", 1);
     }
 
     this.scope.register([], "ArrowLeft", () => (this.go(-1), false));
@@ -74,7 +74,7 @@ export class ImageViewer extends Modal {
     window.addEventListener("resize", this.onResize);
     // Obsidian's own close button (on the phone it can sit outside .modal, in the container): hide every one.
     this.containerEl.querySelectorAll<HTMLElement>(".modal-close-button, .modal-header-button").forEach((x) => x.setCssStyles({ display: "none" }));
-    this.closeBtn = this.modalEl.createEl("button", { cls: "fc-lightbox-close", attr: { "aria-label": "Close (Esc)" } });
+    this.closeBtn = this.modalEl.createEl("button", { cls: "fc-lightbox-close", attr: { "aria-label": "Закрыть (Esc)" } });
     setIcon(this.closeBtn, "x");
     this.closeBtn.addEventListener("click", (e) => {
       e.stopPropagation();

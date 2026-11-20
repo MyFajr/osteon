@@ -141,7 +141,7 @@ export function donut(host: HTMLElement, slices: Slice[]): void {
   }
   const tr = table.createEl("tr", { cls: "fc-total" });
   tr.createEl("td");
-  tr.createEl("td", { text: "Total" });
+  tr.createEl("td", { text: "Всего" });
   tr.createEl("td", { text: String(total), cls: "fc-num" });
   tr.createEl("td");
 }

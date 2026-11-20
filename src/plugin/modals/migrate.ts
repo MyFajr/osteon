@@ -1,6 +1,6 @@
 /**
  * Migrate from obsidian-spaced-repetition (spec 0002 §8): preview first, write only on confirm.
- * Also lists overstuffed cards to rewrite ("Needs rewrite").
+ * Also lists overstuffed cards to rewrite ("Нужна переработка").
  */
 import { App, Modal, Notice, Setting, TFile } from "obsidian";
 import type { CardRef } from "../../core/collection";
@@ -34,7 +34,7 @@ function issueList(app: App, el: HTMLElement, title: string, items: Array<Migrat
     li.createSpan({ text: ` — ${it.reason}`, cls: "fc-muted" });
     li.createDiv({ text: it.text.trim().slice(0, 140), cls: "fc-issue-text" });
   }
-  if (items.length > max) el.createDiv({ cls: "fc-muted", text: `…and ${items.length - max} more.` });
+  if (items.length > max) el.createDiv({ cls: "fc-muted", text: `…и ещё ${items.length - max}.` });
 }
 
 export class MigrateModal extends Modal {
@@ -50,19 +50,19 @@ export class MigrateModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Migrate from Spaced Repetition");
+    this.setTitle("Перенос из Spaced Repetition");
     const { contentEl } = this;
     contentEl.createEl("p", {
       text:
-        "Keeps each card's schedule from its <!--SR:…--> comment, removes the comment, and gives the card its ^fc- ID. " +
-        "SR `?` cards with a one-line front become `front ::`. Nothing is written until you press Migrate. " +
-        "Before migrating, turn off the Spaced Repetition plugin (so it doesn't add its comments back), and make a copy of the folder if you want an easy undo.",
+        "Сохраняет расписание каждой карточки из комментария <!--SR:…-->, убирает комментарий и даёт карточке идентификатор ^fc-. " +
+        "Карточки SR с «?» и вопросом в одну строку становятся «вопрос ::». Ничего не записывается, пока вы не нажмёте «Перенести». " +
+        "Перед переносом выключите плагин Spaced Repetition (чтобы он не вернул свои комментарии) и сделайте копию папки, если захотите откатить.",
     });
     new Setting(contentEl)
-      .setName("Folder")
-      .setDesc("Leave empty for every #flashcards note in the vault.")
-      .addText((t) => t.setPlaceholder("e.g. Ortho").onChange((v) => (this.folder = v.trim().replace(/^\/+|\/+$/g, ""))))
-      .addButton((b) => b.setButtonText("Preview").setCta().onClick(() => void this.runPreview()));
+      .setName("Папка")
+      .setDesc("Оставьте пустым, чтобы взять все заметки с #flashcards в хранилище.")
+      .addText((t) => t.setPlaceholder("напр. Ортопедия").onChange((v) => (this.folder = v.trim().replace(/^\/+|\/+$/g, ""))))
+      .addButton((b) => b.setButtonText("Предпросмотр").setCta().onClick(() => void this.runPreview()));
     this.resultEl = contentEl.createDiv();
   }
 
@@ -97,13 +97,13 @@ export class MigrateModal extends Modal {
     const changed = p.files.filter((f) => f.changed).length;
     el.createEl("p", {
       text:
-        `${p.files.length} notes, ${p.cards} cards. ${p.scheduled} schedules to import, ${p.converted} “?” cards to convert, ` +
-        `${changed} notes will be edited.`,
+        `Заметок: ${p.files.length}, карточек: ${p.cards}. Расписаний к импорту: ${p.scheduled}, карточек «?» к преобразованию: ${p.converted}, ` +
+        `Будет изменено заметок: ${changed}.`,
     });
     if (changed) {
       new Setting(el).addButton((b) =>
         b
-          .setButtonText(`Migrate ${changed} note${changed === 1 ? "" : "s"}`)
+          .setButtonText(`Перенести ${changed} замет${changed === 1 ? "ку" : changed < 5 ? "ки" : "ок"}`)
           .setCta()
           .onClick(async () => {
             b.setDisabled(true);
@@ -111,8 +111,8 @@ export class MigrateModal extends Modal {
           }),
       );
     }
-    issueList(this.app, el, "Needs a manual look", p.manual);
-    issueList(this.app, el, "Needs rewrite (explanation inside the cloze, or too long)", p.rewrite);
+    issueList(this.app, el, "Нужна ручная проверка", p.manual);
+    issueList(this.app, el, "Нужна переработка (объяснение внутри cloze или слишком длинно)", p.rewrite);
   }
 
   private async migrate(): Promise<void> {
@@ -138,14 +138,14 @@ export class MigrateModal extends Modal {
       notes++;
     }
     await this.plugin.logEvents(events);
-    new Notice(`Migrated ${notes} note${notes === 1 ? "" : "s"}; imported ${events.length} schedule${events.length === 1 ? "" : "s"}.`, 8000);
-    this.resultEl.createEl("p", { text: `Done: ${notes} notes migrated, ${events.length} schedules imported.`, cls: "fc-congrats" });
+    new Notice(`Перенесено заметок: ${notes}; расписаний импортировано: ${events.length}.`, 8000);
+    this.resultEl.createEl("p", { text: `Готово: заметок перенесено: ${notes}, расписаний импортировано: ${events.length}.`, cls: "fc-congrats" });
   }
 }
 
 /**
  * Every card that breaks the short-card rule, across the vault (spec 0002 §7), with an optional
- * AI "Suggest split" for each (spec 0005 §3.1): shown for approval, written only on Accept.
+ * AI "Предложить разбиение" for each (spec 0005 §3.1): shown for approval, written only on Accept.
  */
 export class RewriteListModal extends Modal {
   constructor(
@@ -156,7 +156,7 @@ export class RewriteListModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Cards to rewrite");
+    this.setTitle("Карточки к переработке");
     this.render();
   }
 
@@ -173,14 +173,14 @@ export class RewriteListModal extends Modal {
       if (reason) items.push({ ref, reason });
     }
     if (!items.length) {
-      contentEl.createEl("p", { text: "Every card is a short statement. Nothing to rewrite." });
+      contentEl.createEl("p", { text: "Каждая карточка — это короткое утверждение. Перерабатывать нечего." });
       return;
     }
     contentEl.createEl("p", {
       text:
-        `${items.length} card${items.length === 1 ? "" : "s"}. Move the explanation out of the cloze onto a line under the card; it becomes the back. ` +
-        "The card keeps its history." +
-        (this.plugin.settings.ai.enabled ? " “Suggest split” asks the AI for a version to approve." : ""),
+        `${items.length} карточ${items.length === 1 ? "ка" : items.length < 5 ? "ки" : "ек"}. Вынесите объяснение из cloze в строку под карточкой; она станет оборотом. ` +
+        "Карточка сохраняет свою историю." +
+        (this.plugin.settings.ai.enabled ? " «Предложить разбиение» просит ИИ предложить вариант на утверждение." : ""),
     });
     const ul = contentEl.createEl("ul", { cls: "fc-issue-list" });
     for (const { ref, reason } of items.slice(0, 200)) {
@@ -190,7 +190,7 @@ export class RewriteListModal extends Modal {
       li.createSpan({ text: ` — ${reason}`, cls: "fc-muted" });
       li.createDiv({ text: ref.card.sourceLines[0].trim().slice(0, 160), cls: "fc-issue-text" });
       if (this.plugin.settings.ai.enabled) {
-        const btn = li.createEl("button", { text: "Suggest split", cls: "fc-split-btn" });
+        const btn = li.createEl("button", { text: "Предложить разбиение", cls: "fc-split-btn" });
         btn.onclick = async () => {
           btn.disabled = true;
           btn.setText("Thinking…");
@@ -201,20 +201,20 @@ export class RewriteListModal extends Modal {
           const box = li.createDiv({ cls: "fc-split-proposal" });
           box.createEl("pre", { text: proposed });
           const row = box.createDiv({ cls: "fc-split-actions" });
-          const accept = row.createEl("button", { text: "Accept", cls: "mod-cta" });
+          const accept = row.createEl("button", { text: "Принять", cls: "mod-cta" });
           accept.onclick = async () => {
             const ok = await this.plugin.editCard(ref, proposed);
-            if (!ok) new Notice("The note changed since this list was made; reopen the list and try again.");
+            if (!ok) new Notice("Заметка изменилась после составления списка; переоткройте список и попробуйте снова.");
             else {
-              new Notice("Card rewritten.");
+              new Notice("Карточка переработана.");
               this.render();
             }
           };
-          row.createEl("button", { text: "Dismiss" }).onclick = () => box.remove();
+          row.createEl("button", { text: "Отклонить" }).onclick = () => box.remove();
         };
       }
     }
-    if (items.length > 200) contentEl.createDiv({ cls: "fc-muted", text: `…and ${items.length - 200} more.` });
+    if (items.length > 200) contentEl.createDiv({ cls: "fc-muted", text: `…и ещё ${items.length - 200}.` });
   }
 
   onClose(): void {

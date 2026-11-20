@@ -68,8 +68,8 @@ describe("settings tab definitions", () => {
 
   it("keeps the sections in their order, with a key row for every action", () => {
     const { sections } = tabFor(mergeSettings(null));
-    expect(sections().map((g) => g.heading)).toEqual(["Decks", "Cards", "Review", "Game controller", "Review keys", "Medical-term hover", "AI helpers"]);
-    const keyRows = sections().find((g) => g.heading === "Review keys")!.items.map((r) => r.name);
+    expect(sections().map((g) => g.heading)).toEqual(["Колоды", "Карточки", "Повторение", "Геймпад", "Клавиши занятия", "Подсказки медицинских терминов", "ИИ-помощники"]);
+    const keyRows = sections().find((g) => g.heading === "Клавиши занятия")!.items.map((r) => r.name);
     for (const label of Object.values(ACTIONS)) expect(keyRows).toContain(label);
   });
 
@@ -86,19 +86,19 @@ describe("settings tab definitions", () => {
     const { rows, shown } = tabFor(s);
     const ai = () =>
       rows()
-        .filter((r) => shown(r) && (r.name === "Server address" || r.name === "Model"))
+        .filter((r) => shown(r) && (r.name === "Адрес сервера" || r.name === "Модель"))
         .map((r) => `${r.name}:${r.control ? "list" : "text"}`);
-    expect(ai()).toEqual(["Model:list"]);
+    expect(ai()).toEqual(["Модель:list"]);
     s.ai.provider = "openai";
-    expect(ai()).toEqual(["Model:text"]);
+    expect(ai()).toEqual(["Модель:text"]);
     s.ai.provider = "custom";
-    expect(ai()).toEqual(["Server address:text", "Model:text"]);
+    expect(ai()).toEqual(["Адрес сервера:text", "Модель:text"]);
   });
 
   it("shows the background picture rows only for the picture theme, without rebuilding the list", () => {
     const s = mergeSettings(null);
     const { rows, shown } = tabFor(s);
-    const built = rows().filter((r) => r.name === "Background picture" || r.name === "Dim the picture");
+    const built = rows().filter((r) => r.name === "Фоновое изображение" || r.name === "Затемнить картинку");
     expect(built.map(shown)).toEqual([false, false]);
     s.cardTheme = "image";
     expect(built.map(shown)).toEqual([true, true]);

@@ -15,12 +15,12 @@ export class RenameDeckModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
-    this.setTitle("Rename deck");
+    this.setTitle("Переименовать колоду");
     let value = this.deck.split("/").join("::");
     const submit = async () => {
       const to = cleanDeckName(value);
       if (!to) {
-        new Notice("Type a deck name.");
+        new Notice("Введите имя колоды.");
         return;
       }
       if (to === this.deck) {
@@ -28,7 +28,7 @@ export class RenameDeckModal extends Modal {
         return;
       }
       if (to.toLowerCase() !== this.deck.toLowerCase() && inDeck(to, this.deck)) {
-        new Notice("A deck can't be moved inside itself.");
+        new Notice("Колоду нельзя переместить внутрь самой себя.");
         return;
       }
       await this.plugin.renameDeck(this.deck, to);
@@ -36,8 +36,8 @@ export class RenameDeckModal extends Modal {
       this.close();
     };
     new Setting(contentEl)
-      .setName("New deck name")
-      .setDesc("Use :: to make it a sub-deck (Parent::Child). Your notes are not changed.")
+      .setName("Новое имя колоды")
+      .setDesc(":: превращает её в подколоду (Родитель::Подколода). Ваши заметки не меняются.")
       .addText((t) => {
         t.setValue(value).onChange((v) => (value = v));
         t.inputEl.addClass("fc-input-wide");
@@ -50,7 +50,7 @@ export class RenameDeckModal extends Modal {
         window.setTimeout(() => t.inputEl.select(), 0);
       });
     new Setting(contentEl)
-      .addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()))
       .addButton((b) => b.setButtonText("OK").setCta().onClick(() => void submit()));
   }
 

@@ -1,4 +1,4 @@
-/** "What I keep missing" (spec 0012): notes ranked by exam misses, with their cards one click away. */
+/** "Что не даётся" (spec 0012): notes ranked by exam misses, with their cards one click away. */
 import { ItemView, type WorkspaceLeaf } from "obsidian";
 import type FlashcardsPlugin from "../../main";
 import { ExamImportModal } from "../modals/exam-import";
@@ -20,7 +20,7 @@ export class MissesView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "What I keep missing";
+    return "Что не даётся";
   }
 
   getIcon(): string {
@@ -44,14 +44,14 @@ export class MissesView extends ItemView {
     el.addClass("fc-misses");
     const exams = this.plugin.exams;
     const head = el.createDiv({ cls: "fc-misses-head" });
-    head.createEl("h2", { text: "What I keep missing" });
+    head.createEl("h2", { text: "Что не даётся" });
     const bar = head.createDiv({ cls: "fc-misses-bar" });
-    const imp = bar.createEl("button", { text: "Import exam results…" });
+    const imp = bar.createEl("button", { text: "Импортировать результаты экзаменов…" });
     imp.onclick = () => new ExamImportModal(this.app, this.plugin).open();
     const ranking = exams.ranking();
     if (ranking.length) {
-      const all = bar.createEl("button", { text: "Study all missed topics", cls: "mod-cta" });
-      all.onclick = () => void this.plugin.studySearch("Missed topics", "missed:1");
+      const all = bar.createEl("button", { text: "Учить все пропущенные темы", cls: "mod-cta" });
+      all.onclick = () => void this.plugin.studySearch("Пропущенные темы", "missed:1");
     }
 
     const taken = exams.results
@@ -60,11 +60,11 @@ export class MissesView extends ItemView {
       .sort((a, b) => b.r.date.localeCompare(a.r.date));
     if (taken.length) {
       const list = el.createDiv({ cls: "fc-muted fc-misses-taken" });
-      list.appendText("Imported: ");
+      list.appendText("Загружено: ");
       taken.forEach(({ r, e }, i) => {
         if (i) list.appendText(" · ");
         const n = Object.values(r.missed).reduce((s, l) => s + l.length, 0);
-        const a = list.createEl("a", { text: `${e!.name} (${n} missed)`, href: "#" });
+        const a = list.createEl("a", { text: `${e!.name} (${n} пропущено)`, href: "#" });
         a.onclick = (ev) => {
           ev.preventDefault();
           new ExamImportModal(this.app, this.plugin, e!.id).open();
@@ -76,8 +76,8 @@ export class MissesView extends ItemView {
       el.createEl("p", {
         cls: "fc-muted",
         text: exams.exams.length
-          ? "No results yet. Import a practice exam to see which topics you keep missing, then study their cards."
-          : "No exam maps in this vault yet (*.exammap.json).",
+          ? "Результатов пока нет. Импортируйте тренировочный экзамен, чтобы увидеть темы, где вы чаще всего ошибаетесь, и выучить их карточки."
+          : "В этом хранилище пока нет экзаменационных карт (*.exammap.json).",
       });
       return;
     }
@@ -90,7 +90,7 @@ export class MissesView extends ItemView {
     }
     const table = el.createEl("table", { cls: "fc-misses-table" });
     const hr = table.createEl("thead").createEl("tr");
-    for (const h of ["Missed", "Topic", "Where", "Cards", ""]) hr.createEl("th", { text: h });
+    for (const h of ["Ошибки", "Тема", "Источник", "Карточки", ""]) hr.createEl("th", { text: h });
     const body = table.createEl("tbody");
     for (const m of ranking) {
       const file = this.app.vault.getFileByPath(m.path);
@@ -108,7 +108,7 @@ export class MissesView extends ItemView {
       tr.createEl("td", { text: String(n) });
       const td = tr.createEl("td");
       if (n) {
-        const b = td.createEl("button", { text: "Study" });
+        const b = td.createEl("button", { text: "Учить" });
         b.onclick = () => void this.plugin.studyNote(file);
       }
     }

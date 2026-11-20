@@ -38,7 +38,7 @@ export class AddCardModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Add card");
+    this.setTitle("Добавить карточку");
     this.render();
   }
 
@@ -50,7 +50,7 @@ export class AddCardModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
     const decks = this.decks();
-    new Setting(contentEl).setName("Deck").addDropdown((d) => {
+    new Setting(contentEl).setName("Колода").addDropdown((d) => {
       for (const deck of decks) d.addOption(deck, deck.split("/").join(" › "));
       d.setValue(this.deck).onChange((v) => {
         this.deck = v;
@@ -62,9 +62,9 @@ export class AddCardModal extends Modal {
     const notes = this.notesIn(this.deck);
     const last: unknown = this.app.loadLocalStorage(LAST_NOTE_KEY);
     if (!this.notePath) this.notePath = typeof last === "string" && notes.includes(last) ? last : notes[0] ?? NEW_NOTE;
-    new Setting(contentEl).setName("Note").addDropdown((d) => {
+    new Setting(contentEl).setName("Заметка").addDropdown((d) => {
       for (const p of notes) d.addOption(p, p.replace(/\.md$/, ""));
-      d.addOption(NEW_NOTE, "New note…");
+      d.addOption(NEW_NOTE, "Новая заметка…");
       d.setValue(this.notePath).onChange((v) => {
         this.notePath = v;
         this.render();
@@ -72,20 +72,20 @@ export class AddCardModal extends Modal {
     });
     if (this.notePath === NEW_NOTE) {
       new Setting(contentEl)
-        .setName("New note name")
-        .setDesc(`Created in ${this.folderFor(this.deck) || "the vault root"}, tagged #flashcards.`)
+        .setName("Имя новой заметки")
+        .setDesc(`Создаётся в папке «${this.folderFor(this.deck) || "корень хранилища"}», с тегом #flashcards.`)
         .addText((t) => t.setValue(this.newName).onChange((v) => (this.newName = v.trim())));
     }
 
     const ta = contentEl.createEl("textarea", { cls: "fc-edit-area fc-add-area" });
     ta.rows = 6;
     ta.placeholder =
-      "The ACL originates on the ==lateral femoral condyle==.\nExplanation on the lines below becomes the back.\n\n(or  Question :: Answer   ·   Term ::: Definition)";
+      "Собственная связка ACL начинается на ==латеральном мыщелке бедренной кости==.\nОбъяснение в строках ниже станет оборотом.\n\n(или  Вопрос :: Ответ   ·   Термин ::: Определение)";
     const add = async () => {
       const text = ta.value.trim();
       if (!text) return;
       if (!parseNote(text).length) {
-        new Notice("That isn't a card yet: add a ==cloze==, or Question :: Answer.");
+        new Notice("Это ещё не карточка: добавьте ==cloze== или Вопрос :: Ответ.");
         return;
       }
       const ok = await this.append(text);
@@ -101,9 +101,9 @@ export class AddCardModal extends Modal {
       }
     });
     new Setting(contentEl)
-      .setDesc("First line = front; lines under it = back. ⌘/Ctrl+Enter adds and keeps this window open.")
-      .addButton((b) => b.setButtonText("Close").onClick(() => this.close()))
-      .addButton((b) => b.setButtonText("Add").setCta().onClick(() => void add()));
+      .setDesc("Первая строка — лицевая сторона; строки под ней — обратная. ⌘/Ctrl+Enter добавляет и оставляет окно открытым.")
+      .addButton((b) => b.setButtonText("Закрыть").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Добавить").setCta().onClick(() => void add()));
     window.setTimeout(() => ta.focus(), 0);
   }
 
@@ -119,13 +119,13 @@ export class AddCardModal extends Modal {
     let file: TFile | null;
     if (this.notePath === NEW_NOTE) {
       if (!this.newName) {
-        new Notice("Give the new note a name.");
+        new Notice("Задайте имя новой заметки.");
         return false;
       }
       const folder = this.folderFor(this.deck);
       const path = normalizePath(`${folder ? folder + "/" : ""}${this.newName.replace(/[\\/:*?"<>|]/g, "-")}.md`);
       if (vault.getAbstractFileByPath(path)) {
-        new Notice("A note with that name already exists.");
+        new Notice("Заметка с таким именем уже существует.");
         return false;
       }
       if (folder && !vault.getAbstractFileByPath(folder)) await vault.createFolder(folder).catch(() => undefined);
@@ -138,13 +138,13 @@ export class AddCardModal extends Modal {
     } else {
       file = vault.getFileByPath(this.notePath);
       if (!file) {
-        new Notice("That note no longer exists.");
+        new Notice("Такой заметки больше нет.");
         return false;
       }
       await vault.process(file, (text) => `${text.replace(/\s*$/, "")}\n\n${card}\n`);
     }
     this.app.saveLocalStorage(LAST_NOTE_KEY, file.path);
-    new Notice(`Added to ${file.basename}.`);
+    new Notice(`Добавлено в ${file.basename}.`);
     this.render();
     return true;
   }

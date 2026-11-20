@@ -26,7 +26,7 @@ function openDb(name: string): Promise<IDBDatabase> {
     const req = indexedDB.open(name, 1);
     req.onupgradeneeded = () => req.result.createObjectStore("kv");
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error ?? new Error("The term dictionary could not be opened."));
+    req.onerror = () => reject(req.error ?? new Error("Не удалось открыть словарь терминов."));
   });
 }
 
@@ -37,8 +37,8 @@ async function idbGet<T>(db: string, key: string): Promise<T | undefined> {
       const tx = d.transaction("kv", "readonly");
       const req = tx.objectStore("kv").get(key);
       req.onsuccess = () => resolve(req.result as T | undefined);
-      req.onerror = () => reject(req.error ?? new Error("The term dictionary could not be opened."));
-      tx.onabort = () => reject(tx.error ?? new Error("IndexedDB read aborted"));
+      req.onerror = () => reject(req.error ?? new Error("Не удалось открыть словарь терминов."));
+      tx.onabort = () => reject(tx.error ?? new Error("Чтение из IndexedDB прервано"));
     });
   } finally {
     d.close();
@@ -52,9 +52,9 @@ async function idbSet(db: string, key: string, value: unknown): Promise<void> {
       const tx = d.transaction("kv", "readwrite");
       tx.objectStore("kv").put(value, key);
       tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error ?? new Error("The term dictionary could not be saved."));
+      tx.onerror = () => reject(tx.error ?? new Error("Не удалось сохранить словарь терминов."));
       // A quota failure aborts without an error event.
-      tx.onabort = () => reject(tx.error ?? new Error("IndexedDB write aborted (storage full?)"));
+      tx.onabort = () => reject(tx.error ?? new Error("Запись в IndexedDB прервана (хранилище переполнено?)"));
     });
   } finally {
     d.close();
@@ -117,13 +117,13 @@ export class TermService {
 
   meshStatus(): string {
     if (!this.meshLoaded) return "";
-    return this.mesh ? `Installed: ${this.mesh.year} edition, ${this.mesh.records.length.toLocaleString()} terms.` : "Not downloaded yet.";
+    return this.mesh ? `Установлено: выпуск ${this.mesh.year}, ${this.mesh.records.length.toLocaleString()} терминов.` : "Ещё не загружен.";
   }
 
   /** Download NLM's ASCII MeSH descriptors (newest available year), filter, and store locally. */
   async downloadMesh(): Promise<void> {
     const now = new Date().getFullYear();
-    const notice = new Notice("Downloading MeSH (about 30 MB)…", 0);
+    const notice = new Notice("Загрузка MeSH (около 30 МБ)…", 0);
     try {
       // NLM keeps the current edition in MESH_FILES/ (when it publishes the ASCII form) and each
       // past edition in its year folder; a missing file redirects to an HTML error page, which
@@ -139,7 +139,7 @@ export class TermService {
           if (res.status !== 200) continue;
           const text = res.text;
           if (!text.startsWith("*NEWRECORD") && !text.slice(0, 2000).includes("*NEWRECORD")) continue;
-          notice.setMessage("Processing MeSH…");
+          notice.setMessage("Обработка MeSH…");
           await new Promise((r) => window.setTimeout(r, 30));
           records = parseMeshAscii(text);
         }
@@ -152,15 +152,15 @@ export class TermService {
         }
         await this.rebuild();
         notice.hide();
-        new Notice(`MeSH ${year} installed: ${records.length.toLocaleString()} terms.`);
+        new Notice(`MeSH ${year} установлен: ${records.length.toLocaleString()} терминов.`);
         return;
       }
       notice.hide();
-      new Notice("Couldn't download MeSH from nlm.nih.gov. Check the connection and try again.");
+      new Notice("Не удалось скачать MeSH с nlm.nih.gov. Проверьте соединение и попробуйте снова.");
     } catch (e) {
       notice.hide();
       console.error("Flashcards: MeSH download failed", e);
-      new Notice("MeSH download failed. See the developer console for details.");
+      new Notice("Не удалось загрузить MeSH. Подробности в консоли разработчика.");
     }
   }
 
@@ -380,7 +380,7 @@ export class TermService {
 
     const head = pop.createDiv({ cls: "fc-term-head" });
     head.createSpan({ cls: "fc-term-title", text: entry.term });
-    const label = { note: "Your note", list: "Your list", mesh: "MeSH", ai: "AI" }[entry.source];
+    const label = { note: "Ваша заметка", list: "Ваш список", mesh: "MeSH", ai: "AI" }[entry.source];
     head.createSpan({ cls: `fc-term-source fc-term-source-${entry.source}`, text: label });
     const body = pop.createDiv({ cls: "fc-term-body" });
 
@@ -389,13 +389,13 @@ export class TermService {
       if (file instanceof TFile) {
         const summary = noteSummary(await this.plugin.app.vault.cachedRead(file));
         if (this.popup !== pop) return;
-        body.createDiv({ text: summary.definition || "(This note has no text paragraph yet.)" });
+        body.createDiv({ text: summary.definition || "(В этой заметке пока нет текстового абзаца.)" });
         if (summary.images.length) {
           const imgs = body.createDiv({ cls: "fc-term-images markdown-rendered" });
           await MarkdownRenderer.render(this.plugin.app, summary.images.join("\n\n"), imgs, file.path, this.popupComponent);
           if (this.popup !== pop) return;
         }
-        const open = pop.createEl("a", { cls: "fc-term-open", text: "Open note →", href: "#" });
+        const open = pop.createEl("a", { cls: "fc-term-open", text: "Открыть заметку →", href: "#" });
         open.onclick = (e) => {
           e.preventDefault();
           this.hide();

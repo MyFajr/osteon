@@ -128,8 +128,8 @@ function when(ts: string, now: Date): string {
   const d = new Date(ts);
   const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const days = Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000);
-  if (days === 0) return `today ${time}`;
-  if (days === 1) return `yesterday ${time}`;
+  if (days === 0) return `сегодня в ${time}`;
+  if (days === 1) return `вчера в ${time}`;
   return `${d.toLocaleDateString([], { month: "short", day: "numeric" })}, ${time}`;
 }
 
@@ -155,10 +155,10 @@ export function syncLines(devices: Record<string, DeviceInfo>, own: string, vers
       const ver = !d.version
         ? ""
         : cmp > 0
-          ? ` · Osteon ${d.version} (newer than this device: restart Obsidian here to update)`
+          ? ` · Osteon ${d.version} (новее этого устройства: перезапустите Obsidian здесь, чтобы обновить)`
           : cmp < 0
-            ? ` · that answer was on Osteon ${d.version}`
+            ? ` · тот ответ был на Osteon ${d.version}`
             : ` · Osteon ${d.version}`;
-      return `Latest from ${name}: ${when(d.last!, now)}${ver}`;
+      return `Последний ответ от ${name}: ${when(d.last!, now)}${ver}`;
     });
 }
