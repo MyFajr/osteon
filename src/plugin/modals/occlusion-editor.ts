@@ -561,7 +561,7 @@ class DiscardModal extends Modal {
     new Setting(this.contentEl)
       .addButton((b) => b.setButtonText("Продолжить правку").onClick(() => this.close()))
       .addButton((b) =>
-        b.setButtonText("Discard").setClass("mod-warning").onClick(() => {
+        b.setButtonText("Отбросить изменения").setClass("mod-warning").onClick(() => {
           this.close();
           this.onDiscard();
         }),
