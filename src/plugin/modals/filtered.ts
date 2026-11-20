@@ -177,7 +177,7 @@ export class CustomStudyModal extends Modal {
     }
     new Setting(contentEl)
       .addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()))
-      .addButton((b) => b.setButtonText("OK").setCta().onClick(() => void this.ok()));
+      .addButton((b) => b.setButtonText("Готово").setCta().onClick(() => void this.ok()));
   }
 
   private async ok(): Promise<void> {
