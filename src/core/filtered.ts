@@ -109,7 +109,7 @@ export function customStudyDeck(
   opts: { state?: CustomStudyState; tags?: string; limit?: number } = {},
 ): Omit<FilteredDeck, "id"> {
   const scope = deck ? `deck:"${deck}" ` : "";
-  const name = "Custom Study Session";
+  const name = "Выборочное изучение";
   switch (kind) {
     case "forgotten":
       return { name, search: `${scope}rated:${n}:1`, limit: 9999, order: "random", reschedule: true };
