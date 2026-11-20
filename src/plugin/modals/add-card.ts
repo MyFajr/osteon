@@ -62,7 +62,7 @@ export class AddCardModal extends Modal {
     const notes = this.notesIn(this.deck);
     const last: unknown = this.app.loadLocalStorage(LAST_NOTE_KEY);
     if (!this.notePath) this.notePath = typeof last === "string" && notes.includes(last) ? last : notes[0] ?? NEW_NOTE;
-    new Setting(contentEl).setName("Note").addDropdown((d) => {
+    new Setting(contentEl).setName("Заметка").addDropdown((d) => {
       for (const p of notes) d.addOption(p, p.replace(/\.md$/, ""));
       d.addOption(NEW_NOTE, "Новая заметка…");
       d.setValue(this.notePath).onChange((v) => {
@@ -73,7 +73,7 @@ export class AddCardModal extends Modal {
     if (this.notePath === NEW_NOTE) {
       new Setting(contentEl)
         .setName("Имя новой заметки")
-        .setDesc(`Created in ${this.folderFor(this.deck) || "корне хранилища"}, tagged #flashcards.`)
+        .setDesc(`Создаётся в папке «${this.folderFor(this.deck) || "корень хранилища"}», с тегом #flashcards.`)
         .addText((t) => t.setValue(this.newName).onChange((v) => (this.newName = v.trim())));
     }
 
