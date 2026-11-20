@@ -58,11 +58,11 @@ const NOTES_MARK = "\n<!--notes\n";
 const AskSchema = z.object({ answer: z.string(), note_issue: z.string(), relevant_notes: z.array(z.string()) });
 
 const ASK_SYSTEM = [
-  "A student is reviewing one flashcard and asks a question about it.",
-  "answer: reply directly, in your own words and from well-established knowledge, in at most 120 words of plain Markdown (short lists are fine, no headings). If you are not sure, say so instead of guessing.",
-  "You are also given the part of the student's own note the card was written in. It is context, not a source: it may contain mistakes, so never repeat a claim just because the note makes it.",
-  "note_issue: if that note says something that conflicts with well-established facts and matters for this card or question, say in at most 40 words what the note says and what is correct. Otherwise an empty string. Do not flag wording, omissions or style.",
-  "relevant_notes: from the list of the student's note titles, the ones worth opening for this question, copied exactly. An empty list if none fit.",
+  "Студент повторяет одну флеш-карточку и задаёт вопрос по ней.",
+  "answer: отвечай напрямую, своими словами и на основе достоверных знаний, максимум 120 слов простого Markdown (короткие списки допустимы, без заголовков). Если не уверен — так и скажи, вместо того чтобы угадывать.",
+  "Тебе также дан фрагмент заметки студента, в которой написана карточка. Это контекст, а не источник: в нём могут быть ошибки, поэтому never повторяй утверждение только потому, что оно есть в заметке.",
+  "note_issue: если заметка утверждает что-то, противоречащее достоверным фактам, и это важно для карточки или вопроса, скажи максимум в 40 словах, что написано в заметке и что верно. Иначе верни пустую строку. Не помечай формулировки, пропуски или стиль.",
+  "relevant_notes: из списка заголовков заметок студента выбери те, что стоит открыть по этому вопросу, скопировав их в точности. Пустой список, если ничего не подходит.",
 ].join(" ");
 
 /** One exchange in the AI helper panel. */
@@ -76,12 +76,12 @@ export interface AskTurn {
 }
 
 const EXPLAIN_SYSTEM = [
-  "A medical student keeps missing this flashcard. Help it stick.",
-  "explanation: in at most 60 words and plain language, say why the answer is what it is (the mechanism, anatomy or reasoning).",
-  "hook: one short memory aid of at most 25 words (a mnemonic, a picture to imagine, or a contrast with the thing it is confused with).",
-  "Use only well-established facts and stay within what the card says; if the card is ambiguous or you are not sure, say so instead of guessing.",
-  "Plain Markdown, no headings.",
-  "relevant_notes: you are also given titles of the student's own notes, found by a rough word match, so many will be off topic. Copy exactly the titles that are truly about this card's subject; an empty list if none are.",
+  "Студент-медик всё время ошибается на этой карточке. Помоги сделать так, чтобы она запомнилась.",
+  "explanation: максимум в 60 словах и простым языком объясни, почему ответ именно такой (механизм, анатомия или логика).",
+  "hook: одна короткая мнемоника до 25 слов (мнемоническое правило, образ для воображения или противопоставление тому, с чем её путают).",
+  "Используй только достоверные факты и не выходи за рамки того, что сказано в карточке; если карточка двусмысленна или ты не уверен — так и скажи, вместо того чтобы угадывать.",
+  "Простой Markdown, без заголовков.",
+  "relevant_notes: тебе также даны заголовки заметок самого студента, найденные по грубому совпадению слов, поэтому многие не по теме. Скопируй в точности только заголовки, которые действительно о предмете этой карточки; пустой список, если таких нет.",
 ].join(" ");
 
 const SplitSchema = z.object({
@@ -90,19 +90,19 @@ const SplitSchema = z.object({
 });
 
 const TERMS_SYSTEM = [
-  "You help a final-year medical student headed into orthopaedic surgery who studies from flashcards.",
-  "For each card, list the terms a student could plausibly not know or mix up: eponyms, abbreviations,",
-  "classification systems, uncommon anatomical, radiological or clinical terms, and drug names.",
-  "Skip everyday words and terms every medical student knows well (for example: fracture, artery, femur, pain).",
-  "Only list terms that appear in the card text, spelled as they appear. Give each a plain, accurate,",
-  "neutral definition of one or two sentences (at most 40 words). If a card has no such terms, return an empty list.",
+  "Ты помогаешь студенту-выпускнику медицинского вуза, готовящемуся к ортопедической хирургии и занимающемуся по флеш-карточкам.",
+  "Для каждой карточки перечисли термины, которые студент мог бы не знать или перепутать: эпонимы, аббревиатуры,",
+  "классификации, редко встречающиеся анатомические, рентгенологические или клинические термины, а также названия препаратов.",
+  "Пропускай бытовые слова и термины, которые знает каждый студент-медик (например: fracture, artery, femur, pain).",
+  "Перечисляй только термины, встречающиеся в тексте карточки, в их исходном написании. Для каждого дай простое, точное,",
+  "нейтральное определение из одного-двух предложений (до 40 слов). Если таких терминов в карточке нет, верни пустой список.",
 ].join(" ");
 
 const SPLIT_SYSTEM = [
-  "You rewrite overstuffed flashcards for a medical student. Keep every fact; add none.",
-  "Return a short declarative front of about 10-15 words stating one fact, with exactly one ==cloze== around",
-  "the key answer (1-4 words). Move the explanation and any extra detail into 1-4 short back lines.",
-  "Keep the student's wording where possible. Plain Markdown only; keep any [[links]] or ![[images]] unchanged.",
+  "Ты переделываешь перегруженные флеш-карточки для студента-медика. Сохрани все факты; ничего не добавляй.",
+  "Верни краткую утвердительную лицевую сторону примерно из 10-15 слов, содержащую один факт, ровно с одним ==cloze== вокруг",
+  "ключевого ответа (1-4 слова). Объяснение и прочие детали перенеси в 1-4 короткие строки обратной стороны.",
+  "По возможности сохраняй формулировки студента. Только простой Markdown; сохраняй [[links]] и ![[images]] без изменений.",
 ].join(" ");
 
 export class AiService {
@@ -168,8 +168,8 @@ export class AiService {
       body: JSON.stringify(chatBody(this.modelName, system, user, z.toJSONSchema(schema))),
       throw: false,
     });
-    if (res.status === 401 || res.status === 403) throw new Error("the API key was rejected.");
-    if (res.status === 429) throw new Error("rate limited; try again in a minute.");
+    if (res.status === 401 || res.status === 403) throw new Error("ключ API отклонён.");
+    if (res.status === 429) throw new Error("превышен лимит запросов; попробуйте через минуту.");
     if (res.status < 200 || res.status >= 300) {
       let msg = "";
       try {
@@ -177,10 +177,10 @@ export class AiService {
       } catch {
         // not JSON
       }
-      throw new Error(`API error ${res.status} ${msg}`.trim());
+      throw new Error(`Ошибка API ${res.status} ${msg}`.trim());
     }
     const parsed = schema.safeParse(chatJson(res.json));
-    if (!parsed.success) throw new Error("The reply couldn't be read.");
+    if (!parsed.success) throw new Error("Ответ не удалось разобрать.");
     return parsed.data;
   }
 
@@ -201,13 +201,13 @@ export class AiService {
     } catch (e) {
       // parse() throws before we see stop_reason when the reply was cut off or declined.
       if (e instanceof Anthropic.AnthropicError && !(e instanceof Anthropic.APIError)) {
-        throw new Error("The reply couldn't be read (it may have been cut off or declined).");
+        throw new Error("Ответ не удалось прочитать (возможно, он был обрезан или отклонён).");
       }
       throw e;
     }
-    if (res.stop_reason === "refusal") throw new Error("The model declined this request.");
-    if (res.stop_reason === "max_tokens") throw new Error("The reply was cut off (too long).");
-    if (!res.parsed_output) throw new Error("The reply couldn't be read.");
+    if (res.stop_reason === "refusal") throw new Error("Модель отклонила этот запрос.");
+    if (res.stop_reason === "max_tokens") throw new Error("Ответ оборвался (слишком длинный).");
+    if (!res.parsed_output) throw new Error("Ответ не удалось разобрать.");
     return res.parsed_output;
   }
 
@@ -258,8 +258,8 @@ export class AiService {
   }
 
   statusText(): string {
-    if (!this.hasKey()) return this.isAnthropic ? "Add an API key first." : "Add an API key and a model name first.";
-    return this.lastStatus || "Looks at cards not seen before and adds definitions for hard terms.";
+    if (!this.hasKey()) return this.isAnthropic ? "Сначала добавьте ключ API." : "Сначала добавьте ключ API и название модели.";
+    return this.lastStatus || "Рассматривает ранее не виденные карточки и добавляет определения сложных терминов.";
   }
 
   // ---- finding terms ----------------------------------------------------------------------------
@@ -301,7 +301,7 @@ export class AiService {
     if (!s.enabled || !s.autoRun || !this.hasKey() || this.running) return;
     const pending = await this.pendingCards();
     if (!pending.length || pending.length > AUTO_LIMIT) {
-      if (pending.length > AUTO_LIMIT) this.lastStatus = `${pending.length} cards not looked at yet. Press Run to process them.`;
+      if (pending.length > AUTO_LIMIT) this.lastStatus = `${pending.length} карточек ещё не рассмотрено. Нажмите «Запустить», чтобы их обработать.`;
       return;
     }
     await this.run(pending, false);
@@ -309,16 +309,16 @@ export class AiService {
 
   async runWithConfirm(): Promise<void> {
     if (!this.hasKey()) {
-      new Notice("Add your API key in Osteon settings first.");
+      new Notice("Сначала добавьте ключ API в настройках Osteon.");
       return;
     }
     if (!this.plugin.settings.ai.enabled) {
-      new Notice("Turn on “Use AI” in Osteon settings first.");
+      new Notice("Сначала включите «Использовать ИИ» в настройках Osteon.");
       return;
     }
     const pending = await this.pendingCards();
     if (!pending.length) {
-      new Notice("Every card has already been looked at.");
+      new Notice("Все карточки уже рассмотрены.");
       return;
     }
     const cost = (PER_CARD[this.plugin.settings.ai.model] ?? 0.007) * pending.length;
@@ -327,28 +327,28 @@ export class AiService {
     const where = AI_PROVIDERS[this.plugin.settings.ai.provider].label;
     new ConfirmModal(
       this.app,
-      `Look at ${pending.length} card${pending.length === 1 ? "" : "s"}?`,
+      `Посмотреть ${pending.length} карточек?`,
       (this.isAnthropic
-        ? `This sends their text to Anthropic's API using ${this.modelName}. Estimated cost: about ${usd(cost)} (billed to your API account). `
-        : `This sends their text to ${where} using ${this.modelName}. The cost depends on that provider and model. `) +
-        "Each card is only ever looked at once." +
-        (big ? ` For a run this size, Batch costs about half (${usd(cost / 2)}) and the definitions arrive within 24 hours (usually under one); they're collected automatically.` : ""),
+        ? `Их текст будет отправлен в API Anthropic через ${this.modelName}. Ожидаемая стоимость: около ${usd(cost)} (списывается с вашего API-аккаунта). `
+        : `Их текст будет отправлен в ${where} через ${this.modelName}. Стоимость зависит от провайдера и модели. `) +
+        "Каждая карточка рассматривается только один раз." +
+        (big ? ` Для такого объёма партия (Batch) обойдётся примерно вдвое дешевле (${usd(cost / 2)}), а определения придут в течение 24 часов (обычно быстрее); они добавляются автоматически.` : ""),
       () => void this.run(pending, true),
-      big ? { label: "Batch (half price)", onClick: () => void this.submitBatch(pending) } : undefined,
+      big ? { label: "Партия (вдвое дешевле)", onClick: () => void this.submitBatch(pending) } : undefined,
     ).open();
   }
 
   private async run(cards: CardRef[], manual: boolean): Promise<void> {
     if (this.running) return;
     this.running = true;
-    const notice = manual ? new Notice(`Looking at ${cards.length} cards…`, 0) : null;
+    const notice = manual ? new Notice(`Просматриваю ${cards.length} карточек…`, 0) : null;
     try {
       const found = await this.process(cards);
-      this.lastStatus = `Last run: ${cards.length} cards, ${found} term definitions added.`;
+      this.lastStatus = `Последний запуск: ${cards.length} карточек, добавлено ${found} определений терминов.`;
       await this.plugin.terms.rebuild();
       if (manual) new Notice(this.lastStatus);
     } catch (e) {
-      this.lastStatus = `Last run failed: ${describe(e)}`;
+      this.lastStatus = `Последний запуск завершился ошибкой: ${describe(e)}`;
       console.error("Flashcards: AI term pass failed", e);
       if (manual) new Notice(this.lastStatus, 10000);
     } finally {
@@ -381,7 +381,7 @@ export class AiService {
   async submitBatch(cards: CardRef[]): Promise<void> {
     if (this.running) return;
     this.running = true;
-    const notice = new Notice(`Sending ${cards.length} cards as a batch…`, 0);
+    const notice = new Notice(`Отправка ${cards.length} карточек партией…`, 0);
     try {
       const model = this.plugin.settings.ai.model;
       const plan = planBatch(cards.map((r) => ({ hash: r.card.hash, text: this.cardText(r) })), BATCH);
@@ -404,10 +404,10 @@ export class AiService {
       if (!(await adapter.exists(this.batchFolder))) await this.app.vault.createFolder(this.batchFolder).catch(() => undefined);
       const record: PendingBatch = { id: batch.id, model, created: new Date().toISOString(), cards: plan.cards };
       await adapter.write(normalizePath(`${this.batchFolder}/${batch.id}.json`), JSON.stringify(record));
-      this.lastStatus = `Batch sent: ${cards.length} cards in ${plan.requests.length} requests. Definitions are added automatically when it finishes (within 24 hours).`;
+      this.lastStatus = `Партия отправлена: ${cards.length} карточек в ${plan.requests.length} запросах. Определения добавятся автоматически по завершении (в течение 24 часов).`;
       new Notice(this.lastStatus, 10000);
     } catch (e) {
-      this.lastStatus = `Batch couldn't be sent: ${describe(e)}`;
+      this.lastStatus = `Партию не удалось отправить: ${describe(e)}`;
       console.error("Flashcards: AI batch submit failed", e);
       new Notice(this.lastStatus, 10000);
     } finally {
@@ -439,8 +439,8 @@ export class AiService {
       await this.append(out.lines);
       await this.app.vault.adapter.remove(path);
       this.lastStatus =
-        `Batch finished: ${out.cardsDone} cards, ${out.terms} term definitions added` +
-        (out.failedRequests ? `; ${out.failedRequests} requests failed and those cards will be retried on the next run.` : ".");
+        `Партия завершена: ${out.cardsDone} карточек, добавлено ${out.terms} определений терминов` +
+        (out.failedRequests ? `; ${out.failedRequests} запросов не удались, эти карточки будут повторены при следующем запуске.` : ".");
       new Notice(this.lastStatus, 10000);
       await this.plugin.terms.rebuild();
     }
@@ -487,11 +487,11 @@ export class AiService {
     if (saved) return saved;
     await this.pullKey();
     if (!this.hasKey() || !this.plugin.settings.ai.enabled) {
-      new Notice("Turn on AI and add an API key in Osteon settings to get explanations.");
+      new Notice("Включите ИИ и добавьте ключ API в настройках Osteon, чтобы получать объяснения.");
       return null;
     }
     if (this.plugin.settings.ai.excludeFolders.some((f) => ref.path.startsWith(f + "/"))) {
-      new Notice("This card is in a folder that's never sent to the API.");
+      new Notice("Эта карточка в папке, содержимое которой никогда не отправляется в API.");
       return null;
     }
     try {
@@ -500,7 +500,7 @@ export class AiService {
       const out = await this.call(EXPLAIN_SYSTEM, `Card:\n${this.cardText(ref)}\n\nThe student's note titles:\n${titles}`, ExplainSchema);
       const picked = new Set(out.relevant_notes.map((t) => t.trim().toLowerCase()));
       const notes = candidates.filter((f) => picked.has(f.basename.toLowerCase())).map((f) => f.path);
-      const text = `${out.explanation.trim()}\n\n**Hook:** ${out.hook.trim()}${notes.length ? `${NOTES_MARK}${notes.join("\n")}\n-->` : ""}`;
+      const text = `${out.explanation.trim()}\n\n**Зацепка:** ${out.hook.trim()}${notes.length ? `${NOTES_MARK}${notes.join("\n")}\n-->` : ""}`;
       const map = await this.loadExplanations();
       map.set(`${ref.uid}|${ref.card.hash}`, text);
       const adapter = this.app.vault.adapter;
@@ -516,7 +516,7 @@ export class AiService {
       await adapter.write(this.explainFile, JSON.stringify(own, null, 1));
       return text;
     } catch (e) {
-      new Notice(`Explanation failed: ${describe(e)}`, 8000);
+      new Notice(`Объяснение не удалось: ${describe(e)}`, 8000);
       return null;
     }
   }
@@ -524,8 +524,8 @@ export class AiService {
   /** Whether the helpers can run for this card right now; a short reason when they can't. */
   blockedReason(ref: CardRef): string | null {
     const ai = this.plugin.settings.ai;
-    if (!ai.enabled || !this.hasKey()) return "Turn on AI and add an API key in Osteon settings to use the helper.";
-    if (ai.excludeFolders.some((f) => ref.path.startsWith(f + "/"))) return "This card is in a folder that's never sent to the AI provider.";
+    if (!ai.enabled || !this.hasKey()) return "Включите ИИ и добавьте ключ API в настройках Osteon, чтобы пользоваться помощником.";
+    if (ai.excludeFolders.some((f) => ref.path.startsWith(f + "/"))) return "Эта карточка в папке, содержимое которой никогда не отправляется ИИ-провайдеру.";
     return null;
   }
 
@@ -606,12 +606,12 @@ export class AiService {
   async suggestSplit(ref: CardRef): Promise<{ front: string; back: string[] } | null> {
     await this.pullKey();
     if (!this.hasKey() || !this.plugin.settings.ai.enabled) {
-      new Notice("Turn on AI and add an API key in Osteon settings to get suggestions.");
+      new Notice("Включите ИИ и добавьте ключ API в настройках Osteon, чтобы получать предложения.");
       return null;
     }
     const excluded = this.plugin.settings.ai.excludeFolders;
     if (excluded.some((f) => ref.path.startsWith(f + "/"))) {
-      new Notice("This card is in a folder that's never sent to the API.");
+      new Notice("Эта карточка в папке, содержимое которой никогда не отправляется в API.");
       return null;
     }
     const src = ref.card.sourceLines
@@ -623,22 +623,22 @@ export class AiService {
       // It must still be a card: a non-empty front with exactly one ==cloze== (for cloze cards).
       const clozes = out.front.match(/==[^=]+==/g) ?? [];
       if (!out.front.trim() || (ref.card.type === "cloze" && clozes.length !== 1)) {
-        new Notice("The suggestion didn't keep exactly one cloze, so it isn't offered. Try again or rewrite by hand.", 8000);
+        new Notice("В предложении не ровно один cloze, поэтому оно не показано. Попробуйте снова или перепишите вручную.", 8000);
         return null;
       }
       return out;
     } catch (e) {
-      new Notice(`Suggestion failed: ${describe(e)}`, 8000);
+      new Notice(`Предложение не удалось: ${describe(e)}`, 8000);
       return null;
     }
   }
 }
 
 function describe(e: unknown): string {
-  if (e instanceof Anthropic.AuthenticationError) return "the API key was rejected.";
-  if (e instanceof Anthropic.RateLimitError) return "rate limited; try again in a minute.";
-  if (e instanceof Anthropic.APIConnectionError) return "no connection to the AI provider.";
-  if (e instanceof Anthropic.APIError) return `API error ${e.status ?? ""} ${e.message}`.trim();
+  if (e instanceof Anthropic.AuthenticationError) return "ключ API отклонён.";
+  if (e instanceof Anthropic.RateLimitError) return "превышен лимит запросов; попробуйте через минуту.";
+  if (e instanceof Anthropic.APIConnectionError) return "нет соединения с ИИ-провайдером.";
+  if (e instanceof Anthropic.APIError) return `Ошибка API ${e.status ?? ""} ${e.message}`.trim();
   return e instanceof Error ? e.message : String(e);
 }
 
@@ -648,7 +648,7 @@ class ConfirmModal extends Modal {
     private heading: string,
     private body: string,
     private onYes: () => void,
-    /** An extra choice beside Run (e.g. "Batch (half price)"). */
+    /** An extra choice beside Run (e.g. "Партия (вдвое дешевле)"). */
     private alt?: { label: string; onClick: () => void },
   ) {
     super(app);
@@ -657,7 +657,7 @@ class ConfirmModal extends Modal {
   onOpen(): void {
     this.setTitle(this.heading);
     this.contentEl.createEl("p", { text: this.body });
-    const row = new Setting(this.contentEl).addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()));
+    const row = new Setting(this.contentEl).addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()));
     if (this.alt) {
       const alt = this.alt;
       row.addButton((b) =>
@@ -669,7 +669,7 @@ class ConfirmModal extends Modal {
     }
     row.addButton((b) =>
         b
-          .setButtonText("Run")
+          .setButtonText("Запустить")
           .setCta()
           .onClick(() => {
             this.close();

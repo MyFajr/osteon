@@ -43,7 +43,7 @@ export interface Queue {
   fresh: QueueItem[];
   /** Earliest time a learning card later today becomes due, if any. */
   nextLearningDue?: Date;
-  /** How new cards mix with reviews (Anki's "New/review order"). */
+  /** How new cards mix with reviews (Anki's "Новые/повторения: порядок"). */
   mix?: NewReviewMix;
   /** Cards resting until tomorrow after too many misses today (`missCap`). */
   rested?: number;

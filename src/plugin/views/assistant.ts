@@ -1,5 +1,5 @@
 /**
- * AI helper: a side panel that follows the card under review. "Explain this card" gives the saved
+ * AI helper: a side panel that follows the card under review. "Объяснить эту карточку" gives the saved
  * explanation (asked once per card version), and a question box takes anything else about the card.
  * Answers are the model's own; the card's note is checked, not trusted (a conflict is pointed out),
  * and each answer links the student's notes worth opening. Nothing is sent until a button is pressed.
@@ -35,7 +35,7 @@ export class AssistantView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "AI helper";
+    return "ИИ-помощник";
   }
 
   getIcon(): string {
@@ -84,14 +84,14 @@ export class AssistantView extends ItemView {
   private async explain(): Promise<void> {
     const ref = this.ref;
     if (!ref || this.busy) return;
-    this.busy = "Explaining…";
+    this.busy = "Объясняем…";
     this.error = "";
     this.render();
     const out = await this.plugin.ai.explain(ref);
     this.busy = "";
     if (this.ref !== ref) return;
     if (out) this.explanation = out;
-    else this.error = "No explanation came back.";
+    else this.error = "Объяснение не получено.";
     this.render();
   }
 
@@ -120,7 +120,7 @@ export class AssistantView extends ItemView {
     const files = paths.map((p) => this.app.vault.getFileByPath(p)).filter((f): f is TFile => !!f);
     if (!files.length) return;
     const row = el.createDiv({ cls: "fc-ai-notes" });
-    row.createSpan({ cls: "fc-muted", text: "In your notes: " });
+    row.createSpan({ cls: "fc-muted", text: "В ваших заметках: " });
     files.forEach((f, i) => {
       if (i) row.createSpan({ cls: "fc-muted", text: " · " });
       const a = row.createEl("a", { text: f.basename, href: "#", cls: "fc-related-link" });
@@ -147,10 +147,10 @@ export class AssistantView extends ItemView {
     const el = this.contentEl;
     el.empty();
     el.addClass("fc-ai");
-    el.createDiv({ cls: "fc-ai-title", text: "AI helper" });
+    el.createDiv({ cls: "fc-ai-title", text: "ИИ-помощник" });
     const ref = this.ref;
     if (!ref) {
-      el.createDiv({ cls: "fc-muted", text: "Start studying a deck. This panel follows the card you are on." });
+      el.createDiv({ cls: "fc-muted", text: "Начните занятие по колоде. Панель следует за карточкой, на которой вы находитесь." });
       return;
     }
     const blocked = this.plugin.ai.blockedReason(ref);
@@ -161,18 +161,18 @@ export class AssistantView extends ItemView {
     const faces = cardFaces(ref.card, ref.slot);
     el.createDiv({ cls: "fc-ai-card fc-muted", text: faces.question.replace(/!\[\[[^\]]*\]\]/g, "").replace(/<[^>]+>/g, "").replace(/\*\*|__/g, "").replace(/(^|[\s(])[*_](?=\S)/g, "$1").replace(/(\S)[*_](?=[\s.,;:)]|$)/g, "$1").slice(0, 200) });
     if (this.side === "front") {
-      el.createDiv({ cls: "fc-muted", text: "Show the answer first. The helper would give it away." });
+      el.createDiv({ cls: "fc-muted", text: "Сначала покажите ответ, иначе помощник его выдаст." });
       return;
     }
     if (this.explanation) {
-      el.createDiv({ cls: "fc-ai-question", text: "Explain this card" });
+      el.createDiv({ cls: "fc-ai-question", text: "Объяснить эту карточку" });
       const saved = AiService.splitExplanation(this.explanation);
       this.md(saved.text, el.createDiv({ cls: "fc-ai-answer" }));
       // Notes the student linked or the card names, then the ones the model picked as relevant.
       const sure = this.plugin.relatedFor(ref).map((f) => f.path);
       this.noteLinks(el, [...sure, ...saved.notes.filter((n) => !sure.includes(n))]);
     } else {
-      const b = el.createEl("button", { text: "Explain this card", cls: "mod-cta" });
+      const b = el.createEl("button", { text: "Объяснить эту карточку", cls: "mod-cta" });
       if (this.busy) b.setAttr("disabled", "true");
       b.onclick = () => void this.explain();
     }
@@ -181,7 +181,7 @@ export class AssistantView extends ItemView {
       this.md(t.answer, el.createDiv({ cls: "fc-ai-answer" }));
       if (t.noteIssue) {
         const warn = el.createDiv({ cls: "fc-ai-note-issue" });
-        warn.createSpan({ cls: "fc-ai-note-issue-label", text: "Check your note: " });
+        warn.createSpan({ cls: "fc-ai-note-issue-label", text: "Проверьте вашу заметку: " });
         warn.createSpan({ text: t.noteIssue });
       }
       this.noteLinks(el, t.notes);
@@ -189,11 +189,11 @@ export class AssistantView extends ItemView {
     if (this.busy) el.createDiv({ cls: "fc-muted fc-ai-busy", text: this.busy });
     if (this.error) el.createDiv({ cls: "fc-ai-error", text: this.error });
     const form = el.createDiv({ cls: "fc-ai-form" });
-    form.createDiv({ cls: "fc-ai-caution fc-muted", text: "AI answers can be wrong. Check anything you will rely on." });
-    const input = form.createEl("textarea", { attr: { rows: "2", placeholder: "Ask about this card…" } });
+    form.createDiv({ cls: "fc-ai-caution fc-muted", text: "Ответы ИИ могут быть неверными. Проверяйте всё, на что будете опираться." });
+    const input = form.createEl("textarea", { attr: { rows: "2", placeholder: "Спросить об этой карточке…" } });
     input.value = this.draft;
     input.oninput = () => (this.draft = input.value);
-    const send = form.createEl("button", { text: "Ask" });
+    const send = form.createEl("button", { text: "Спросить" });
     if (this.busy) send.setAttr("disabled", "true");
     send.onclick = () => void this.ask(input.value);
     // After an answer arrives, bring it into view (the box below stays pinned).

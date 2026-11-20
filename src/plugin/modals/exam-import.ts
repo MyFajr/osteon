@@ -34,17 +34,17 @@ export class ExamImportModal extends Modal {
   private render(): void {
     const { contentEl } = this;
     contentEl.empty();
-    this.setTitle("Import exam results");
+    this.setTitle("Импорт результатов экзаменов");
     const exams = this.plugin.exams.exams;
     if (!exams.length) {
       contentEl.createEl("p", {
-        text: "No exam maps found. An exam map is a *.exammap.json file (the Step 2 CK Atlas ships one) that says which note each question tests.",
+        text: "Карты экзаменов не найдены. Карта экзамена — файл *.exammap.json (один входит в Step 2 CK Atlas), указывающий, какую заметку проверяет каждый вопрос.",
       });
       return;
     }
     contentEl.createEl("p", {
       cls: "fc-muted",
-      text: "Type the numbers of the questions you missed in each block (e.g. 3, 7, 12-14). Only the numbers are saved; they point to the notes each question tests.",
+      text: "Введите номера пропущенных вопросов в каждом блоке (напр. 3, 7, 12-14). Сохраняются только номера; они указывают на заметки, которые проверяет каждый вопрос.",
     });
     new Setting(contentEl).setName("Exam").addDropdown((d) => {
       for (const e of exams) d.addOption(e.id, `${e.name}${SOURCE_NAMES[e.source] && !e.name.includes(SOURCE_NAMES[e.source]) ? ` (${SOURCE_NAMES[e.source]})` : ""}${this.plugin.exams.result(e.id) ? " ✓" : ""}`);
@@ -55,7 +55,7 @@ export class ExamImportModal extends Modal {
     });
     const exam = this.exam;
     if (!exam) return;
-    new Setting(contentEl).setName("Date taken").addText((t) => {
+    new Setting(contentEl).setName("Дата сдачи").addText((t) => {
       t.inputEl.type = "date";
       t.setValue(this.date).onChange((v) => (this.date = v || this.date));
     });
@@ -67,17 +67,17 @@ export class ExamImportModal extends Modal {
       for (const b of exam.blocks) for (const n of missed[b.name] ?? []) for (const p of b.items[String(n)] ?? []) notes.add(p);
       const lost = unmappedItems(exam, missed);
       summary.setText(
-        `${items} missed item${items === 1 ? "" : "s"} → ${notes.size} topic note${notes.size === 1 ? "" : "s"}` +
-          (lost.length ? `. No note for: ${lost.slice(0, 8).join(", ")}${lost.length > 8 ? "…" : ""}` : "."),
+        `Пропущенных вопросов: ${items} → заметок тем: ${notes.size}` +
+          (lost.length ? `. Нет заметки для: ${lost.slice(0, 8).join(", ")}${lost.length > 8 ? "…" : ""}` : "."),
       );
     };
     for (const b of exam.blocks) {
       const max = Math.max(0, ...Object.keys(b.items).map(Number));
       new Setting(contentEl)
         .setName(b.name)
-        .setDesc(`Items 1–${max}`)
+        .setDesc(`Вопросы 1–${max}`)
         .addText((t) => {
-          t.setPlaceholder("e.g. 3, 7, 12-14").setValue(this.text[b.name] ?? "").onChange((v) => {
+          t.setPlaceholder("напр. 3, 7, 12-14").setValue(this.text[b.name] ?? "").onChange((v) => {
             this.text[b.name] = v;
             update();
           });
@@ -89,15 +89,15 @@ export class ExamImportModal extends Modal {
     const bar = new Setting(contentEl);
     if (saved)
       bar.addButton((b) =>
-        destructive(b).setButtonText("Delete saved result").onClick(async () => {
+        destructive(b).setButtonText("Удалить сохранённый результат").onClick(async () => {
           await this.plugin.exams.remove(exam.id);
-          new Notice(`Removed your ${exam.name} result (tags already added stay).`);
+          new Notice(`Результат «${exam.name}» удалён (уже добавленные теги останутся).`);
           this.pick(exam.id);
           this.render();
         }),
       );
     bar.addButton((b) =>
-      b.setButtonText(saved ? "Update" : "Save").setCta().onClick(async () => {
+      b.setButtonText(saved ? "Update" : "Сохранить").setCta().onClick(async () => {
         await this.plugin.exams.save({ examId: exam.id, date: this.date, missed: this.missed() });
         this.close();
         void this.plugin.openMisses();

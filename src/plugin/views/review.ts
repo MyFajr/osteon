@@ -22,18 +22,18 @@ import { applyCardTheme, keyString, type ActionName } from "../settings";
 import { VIEW_DECKS } from "./decks";
 import { timed, trace } from "../trace";
 
-export const FLAG_NAMES = ["", "Red", "Orange", "Green", "Blue", "Pink", "Turquoise", "Purple"];
+export const FLAG_NAMES = ["", "Красный", "Оранжевый", "Зелёный", "Синий", "Розовый", "Бирюзовый", "Фиолетовый"];
 
 export const VIEW_REVIEW = "flashcards-review";
 
 type Phase = "overview" | "front" | "back" | "done";
 
-const LABEL: Record<RatingName, string> = { again: "Again", hard: "Hard", good: "Good", easy: "Easy" };
+const LABEL: Record<RatingName, string> = { again: "Снова", hard: "Трудно", good: "Хорошо", easy: "Легко" };
 /** The overview's three counts: label, the word used in a sentence, colour class. */
 const KINDS: Record<CardKind, { label: string; word: string; cls: string }> = {
-  fresh: { label: "New", word: "new", cls: "fc-new" },
-  learning: { label: "Learning", word: "learning", cls: "fc-learn" },
-  review: { label: "To review", word: "review", cls: "fc-due" },
+  fresh: { label: "Новые", word: "new", cls: "fc-new" },
+  learning: { label: "Изучение", word: "learning", cls: "fc-learn" },
+  review: { label: "В повторение", word: "review", cls: "fc-due" },
 };
 
 export class ReviewView extends ItemView {
@@ -81,8 +81,8 @@ export class ReviewView extends ItemView {
 
   getDisplayText(): string {
     const f = this.filtered ? this.plugin.filteredDeck(this.filtered) : undefined;
-    if (f) return `Review: ${f.name}`;
-    return this.deck ? `Review: ${this.deck.split("/").pop()}` : "Review";
+    if (f) return `Повторение: ${f.name}`;
+    return this.deck ? `Повторение: ${this.deck.split("/").pop()}` : "Повторение";
   }
 
   getIcon(): string {
@@ -180,7 +180,7 @@ export class ReviewView extends ItemView {
   /** Switch one kind of card on or off for the session about to start (at least one stays on). */
   private toggleKind(kind: CardKind, refocus = false): void {
     if (this.kinds.has(kind) && this.kinds.size === 1) {
-      new Notice("Keep at least one kind of card on.");
+      new Notice("Оставьте включённым хотя бы один тип карточек.");
       return;
     }
     if (this.kinds.has(kind)) this.kinds.delete(kind);
@@ -192,7 +192,7 @@ export class ReviewView extends ItemView {
   /** "12 learning and 3 new": the cards of the kinds left out that are still waiting. */
   private skippedText(q: Queue): string {
     const parts = ALL_KINDS.filter((k) => q.skipped?.[k]).map((k) => `${q.skipped![k]} ${KINDS[k].word}`);
-    return parts.join(" and ");
+    return parts.join(" и ");
   }
 
   private pickNext(): QueueItem | undefined {
@@ -211,26 +211,26 @@ export class ReviewView extends ItemView {
     el.empty();
     const wrap = el.createDiv({ cls: "fc-overview" });
     if (!this.plugin.ready) {
-      wrap.createDiv({ cls: "fc-muted", text: "Loading cards…" });
+      wrap.createDiv({ cls: "fc-muted", text: "Загрузка карточек…" });
       return;
     }
     const fdef = this.filteredDef();
     if (this.filtered && !fdef) {
-      wrap.createEl("p", { text: "This filtered deck was deleted." });
-      wrap.createEl("button", { text: "Decks" }).onclick = () => this.plugin.openDecks();
+      wrap.createEl("p", { text: "Эта фильтрованная колода удалена." });
+      wrap.createEl("button", { text: "Колоды" }).onclick = () => this.plugin.openDecks();
       return;
     }
-    wrap.createEl("h2", { text: fdef ? fdef.name : this.deck ? this.deck.split("/").join(" › ") : "All decks", cls: fdef ? "fc-filtered-name" : "" });
-    if (fdef) wrap.createDiv({ cls: "fc-muted", text: `Filtered deck: ${fdef.search || "(all cards)"}${fdef.reschedule ? "" : " · preview, answers aren't recorded"}` });
+    wrap.createEl("h2", { text: fdef ? fdef.name : this.deck ? this.deck.split("/").join(" › ") : "Все колоды", cls: fdef ? "fc-filtered-name" : "" });
+    if (fdef) wrap.createDiv({ cls: "fc-muted", text: `Filtered deck: ${fdef.search || "(все карточки)"}${fdef.reschedule ? "" : " · предпросмотр, ответы не записываются"}` });
     const q = this.queue();
     const c = counts(q);
     const waiting = q.skipped ? q.skipped.fresh + q.skipped.learning + q.skipped.review : 0;
     if (this.phase === "done" && this.timeUp) {
       const left = c.fresh + c.learning + c.review;
-      wrap.createEl("p", { cls: "fc-congrats", text: `Time's up: ${this.answered} card${this.answered === 1 ? "" : "s"} in ${this.timedMins} minutes.` });
-      wrap.createEl("p", { cls: "fc-muted", text: left ? `${left} still waiting today. The ones most at risk came first.` : "Nothing else is waiting right now." });
+      wrap.createEl("p", { cls: "fc-congrats", text: `Время вышло: отвечено ${this.answered} ${this.answered === 1 ? "карточку" : "карточек"} за ${this.timedMins} мин.` });
+      wrap.createEl("p", { cls: "fc-muted", text: left ? `Сегодня ещё ждут: ${left}. Первыми идут самые важные.` : "Сейчас больше ничего не ждёт." });
       if (left) {
-        const more = wrap.createEl("button", { text: "Keep going", cls: "fc-study-now" });
+        const more = wrap.createEl("button", { text: "Продолжить", cls: "fc-study-now" });
         more.onclick = () => {
           this.until = 0;
           this.timeUp = false;
@@ -238,11 +238,11 @@ export class ReviewView extends ItemView {
         };
       }
     } else if (this.phase === "done" || c.fresh + c.learning + c.review + waiting === 0) {
-      wrap.createEl("p", { cls: "fc-congrats", text: "Congratulations! You have finished this deck for now." });
+      wrap.createEl("p", { cls: "fc-congrats", text: "Поздравляем! Вы закончили эту колоду — пока всё." });
       if (waiting) {
         // Only some kinds were in this session: say what was left out, and offer it.
-        wrap.createEl("p", { cls: "fc-muted", text: `Left out of this session and still waiting: ${this.skippedText(q)}.` });
-        const rest = wrap.createEl("button", { text: "Study the rest", cls: "fc-study-now" });
+        wrap.createEl("p", { cls: "fc-muted", text: `Не вошли в этот сеанс и ещё ждут: ${this.skippedText(q)}.` });
+        const rest = wrap.createEl("button", { text: "Учить остальные", cls: "fc-study-now" });
         rest.onclick = () => {
           this.kinds = new Set(ALL_KINDS);
           this.start();
@@ -251,7 +251,7 @@ export class ReviewView extends ItemView {
       if (q.nextLearningDue) {
         wrap.createEl("p", {
           cls: "fc-muted",
-          text: `The next learning card will be ready in ${formatInterval(q.nextLearningDue.getTime() - Date.now())}.`,
+          text: `Следующая карточка изучения будет готова через ${formatInterval(q.nextLearningDue.getTime() - Date.now())}.`,
         });
       }
     } else if (fdef) {
@@ -263,8 +263,8 @@ export class ReviewView extends ItemView {
       };
       row("New:", c.fresh, "fc-new");
       row("Learning:", c.learning, "fc-learn");
-      row("To Review:", c.review, "fc-due");
-      const btn = wrap.createEl("button", { text: "Study now", cls: "mod-cta fc-study-now" });
+      row("В повторение:", c.review, "fc-due");
+      const btn = wrap.createEl("button", { text: "Учить сейчас", cls: "mod-cta fc-study-now" });
       btn.onclick = () => this.start();
     } else {
       // The three counts are switches: one that is off is left out of the session about to start.
@@ -273,7 +273,7 @@ export class ReviewView extends ItemView {
         const on = this.kinds.has(kind);
         const { label, cls } = KINDS[kind];
         const b = list.createEl("button", { cls: `fc-kind ${on ? "" : "fc-kind-off"}`, attr: { "data-kind": kind, "aria-pressed": String(on) } });
-        b.setAttr("aria-label", `${label}, ${c[kind] + (q.skipped?.[kind] ?? 0)}: ${on ? "in this session" : "left out of this session"}`);
+        b.setAttr("aria-label", `${label}, ${c[kind] + (q.skipped?.[kind] ?? 0)}: ${on ? "в этом занятии" : "исключено из занятия"}`);
         setIcon(b.createSpan({ cls: "fc-kind-check" }), on ? "check-square" : "square");
         b.createSpan({ cls: "fc-kind-label", text: label });
         b.createSpan({ cls: `fc-num ${cls}`, text: String(c[kind] + (q.skipped?.[kind] ?? 0)) });
@@ -284,19 +284,19 @@ export class ReviewView extends ItemView {
       wrap.createEl("p", {
         cls: "fc-muted fc-kinds-note",
         text: off.length
-          ? `Only ${ALL_KINDS.filter((k) => this.kinds.has(k)).map((k) => KINDS[k].word).join(" and ")} cards this session. The others keep their schedule.`
+          ? `Only ${ALL_KINDS.filter((k) => this.kinds.has(k)).map((k) => KINDS[k].word).join(" и ")} cards this session. The others keep their schedule.`
           : Platform.isMobile
-            ? "Tap a kind to leave it out of this session."
-            : "Click a kind (or press 1, 2 or 3) to leave it out of this session.",
+            ? "Коснитесь типа, чтобы исключить его из занятия."
+            : "Нажмите на тип (или клавиши 1, 2, 3), чтобы исключить его из занятия.",
       });
       if (q.newHeld) wrap.createEl("p", { cls: "fc-muted", text: this.heldNote(q) });
-      const btn = wrap.createEl("button", { text: "Study now", cls: "mod-cta fc-study-now" });
+      const btn = wrap.createEl("button", { text: "Учить сейчас", cls: "mod-cta fc-study-now" });
       btn.onclick = () => this.start();
       // A timed sitting: stops cleanly when the time is up, most at-risk cards first.
       const timedRow = wrap.createDiv({ cls: "fc-timed" });
-      timedRow.createSpan({ cls: "fc-muted", text: "Timed sitting: " });
+      timedRow.createSpan({ cls: "fc-muted", text: "Занятие по таймеру: " });
       for (const mins of [5, 10, 15, 20]) {
-        const b = timedRow.createEl("button", { text: `${mins} min` });
+        const b = timedRow.createEl("button", { text: `${mins} мин` });
         b.onclick = () => {
           this.until = Date.now() + mins * 60000;
           this.timedMins = mins;
@@ -307,7 +307,7 @@ export class ReviewView extends ItemView {
       }
     }
     const nav = wrap.createDiv({ cls: "fc-deck-buttons" });
-    const back = nav.createEl("button", { text: "Decks" });
+    const back = nav.createEl("button", { text: "Колоды" });
     back.onclick = () => this.plugin.openDecks();
     if (fdef) {
       // Anki's filtered-deck overview: Rebuild, Empty, Options.
@@ -316,7 +316,7 @@ export class ReviewView extends ItemView {
         this.previewDone = new Set();
         this.previewOrder = null;
         this.phase = "overview";
-        new Notice(`Rebuilt: ${n} card${n === 1 ? "" : "s"}.`);
+        new Notice(`Пересобрано: ${n} карточ${n === 1 ? "ка" : n < 5 ? "ки" : "ек"}.`);
         this.render();
       };
       nav.createEl("button", { text: "Empty" }).onclick = async () => {
@@ -326,8 +326,8 @@ export class ReviewView extends ItemView {
       nav.createEl("button", { text: "Options" }).onclick = () => new FilteredDeckModal(this.app, this.plugin, fdef).open();
       return;
     }
-    nav.createEl("button", { text: "Custom Study" }).onclick = () => new CustomStudyModal(this.app, this.plugin, this.deck).open();
-    const stats = nav.createEl("button", { text: "Stats" });
+    nav.createEl("button", { text: "Своё занятие" }).onclick = () => new CustomStudyModal(this.app, this.plugin, this.deck).open();
+    const stats = nav.createEl("button", { text: "Статистика" });
     stats.onclick = () => this.plugin.openStats(this.deck);
     // The Review Heatmap add-on also shows under a deck's overview, for that deck only.
     if (this.plugin.settings.showHeatmap) {
@@ -336,7 +336,7 @@ export class ReviewView extends ItemView {
   }
 
   private start(): void {
-    trace("Study Now");
+    trace("Учить сейчас");
     const next = this.pickNext();
     if (!next) {
       this.phase = "done";
@@ -403,7 +403,7 @@ export class ReviewView extends ItemView {
     top.createDiv({ cls: "fc-trail", text: [ref.deck.split("/").join(" › "), ...ref.card.headings].join("  ·  ") });
     if (this.until) {
       const left = Math.max(0, Math.ceil((this.until - Date.now()) / 60000));
-      top.createSpan({ cls: "fc-muted fc-time-left-sitting", text: `${left} min left` });
+      top.createSpan({ cls: "fc-muted fc-time-left-sitting", text: `осталось ${left} мин` });
     }
     const actions = top.createDiv({ cls: "fc-actions" });
     const action = (icon: string, label: string, fn: () => void, enabled = true) => {
@@ -418,12 +418,12 @@ export class ReviewView extends ItemView {
     const flag = item.state?.flag ?? 0;
     const marked = item.state?.marked ?? false;
     if (marked) setIcon(top.createSpan({ cls: "fc-marked", attr: { "aria-label": "Marked" } }), "star");
-    action("undo-2", "Undo", () => void this.undo(), this.undoStack.length > 0);
+    action("undo-2", "Отменить", () => void this.undo(), this.undoStack.length > 0);
     if (ref.card.type === "cloze") {
       const on = this.isCrowned(ref);
       const b = actions.createEl("button", {
         cls: `clickable-icon fc-action fc-crown-toggle${on ? " is-active" : ""}`,
-        attr: { "aria-label": on ? "Answers reveal one by one. Click for all at once" : "Reveal this card's answers one by one" },
+        attr: { "aria-label": on ? "Ответы открываются по одному. Нажмите, чтобы показать все сразу" : "Открывать ответы этой карточки по одному" },
       });
       setIcon(b, "bone");
       b.onclick = (e) => {
@@ -431,34 +431,34 @@ export class ReviewView extends ItemView {
         void this.toggleCrown();
       };
     }
-    action("pencil", "Edit card", () => this.editCard());
-    action("file-text", "Open note", () => void this.openNote());
-    if (this.plugin.settings.ai.enabled) action("sparkles", "AI helper (explain this card, ask about it)", () => void this.plugin.openAssistant());
+    action("pencil", "Изменить карточку", () => this.editCard());
+    action("file-text", "Открыть заметку", () => void this.openNote());
+    if (this.plugin.settings.ai.enabled) action("sparkles", "ИИ-помощник (объяснить карточку, задать вопрос)", () => void this.plugin.openAssistant());
     action("flag", "Flag", () => {
       const menu = new Menu();
       FLAG_NAMES.forEach((name, n) => {
         if (n === 0) return;
         menu.addItem((i) => i.setTitle(`${name} flag`).setChecked(flag === n).onClick(() => void this.setFlag(n)));
       });
-      if (flag) menu.addItem((i) => i.setTitle("Remove flag").onClick(() => void this.setFlag(0)));
+      if (flag) menu.addItem((i) => i.setTitle("Убрать флажок").onClick(() => void this.setFlag(0)));
       menu.showAtPosition({ x: actions.getBoundingClientRect().right - 160, y: actions.getBoundingClientRect().bottom });
     });
     action("more-horizontal", "More", () => {
       const menu = new Menu();
-      menu.addItem((i) => i.setTitle(marked ? "Unmark" : "Mark").setIcon("star").onClick(() => void this.toggleMark()));
-      menu.addItem((i) => i.setTitle("Bury card").setIcon("eye-off").onClick(() => void this.hide("bury")));
-      menu.addItem((i) => i.setTitle("Suspend card").setIcon("pause").onClick(() => void this.hide("suspend")));
-      menu.addItem((i) => i.setTitle("Set due date…").setIcon("calendar").onClick(() => this.setDue()));
-      menu.addItem((i) => i.setTitle("Link a note to this card…").setIcon("link").onClick(() => this.linkNote()));
+      menu.addItem((i) => i.setTitle(marked ? "Unmark" : "Пометить").setIcon("star").onClick(() => void this.toggleMark()));
+      menu.addItem((i) => i.setTitle("Отложить карточку").setIcon("eye-off").onClick(() => void this.hide("bury")));
+      menu.addItem((i) => i.setTitle("Приостановить карточку").setIcon("pause").onClick(() => void this.hide("suspend")));
+      menu.addItem((i) => i.setTitle("Задать срок…").setIcon("calendar").onClick(() => this.setDue()));
+      menu.addItem((i) => i.setTitle("Привязать заметку к этой карточке…").setIcon("link").onClick(() => this.linkNote()));
       for (const f of this.plugin.manualNotes(ref)) {
         menu.addItem((i) => i.setTitle(`Unlink “${f.basename}”`).setIcon("unlink").onClick(() => void this.unlinkNote(f)));
       }
-      menu.addItem((i) => i.setTitle("Open the card's source note").setIcon("file-search").onClick(() => void this.openNote(true)));
-      menu.addItem((i) => i.setTitle("Card info").setIcon("info").onClick(() => this.cardInfo()));
-      menu.addItem((i) => i.setTitle("Deck options").setIcon("settings").onClick(() => this.deckOptions()));
+      menu.addItem((i) => i.setTitle("Открыть исходную заметку карточки").setIcon("file-search").onClick(() => void this.openNote(true)));
+      menu.addItem((i) => i.setTitle("Информация о карточке").setIcon("info").onClick(() => this.cardInfo()));
+      menu.addItem((i) => i.setTitle("Параметры колоды").setIcon("settings").onClick(() => this.deckOptions()));
       menu.addItem((i) =>
         i
-          .setTitle(this.autoAdvance ? "Stop Auto Advance" : "Auto Advance")
+          .setTitle(this.autoAdvance ? "Остановить автопереход" : "Автопереход")
           .setIcon(this.autoAdvance ? "pause-circle" : "play-circle")
           .onClick(() => this.toggleAutoAdvance()),
       );
@@ -487,7 +487,7 @@ export class ReviewView extends ItemView {
         const backEl = card.createDiv({ cls: "fc-back markdown-rendered" });
         const labels = active.map((id) => occ.masks.find((m) => m.id === id)?.label).filter(Boolean);
         if (labels.length) backEl.createDiv({ cls: "fc-io-label", text: labels.join(", ") });
-        const toggle = backEl.createEl("button", { text: this.showAllMasks ? "Hide other masks (T)" : "Toggle masks (T)", cls: "fc-io-toggle" });
+        const toggle = backEl.createEl("button", { text: this.showAllMasks ? "Скрыть остальные маски (T)" : "Переключить маски (T)", cls: "fc-io-toggle" });
         toggle.onclick = (e) => {
           e.stopPropagation();
           this.toggleMasks();
@@ -588,7 +588,7 @@ export class ReviewView extends ItemView {
         // A kind left out of this session: dimmed, so its 0 doesn't read as "none waiting".
         if (!this.filtered && !this.kinds.has(kind) && !active) {
           span.addClass("fc-zero");
-          span.setAttr("aria-label", "Left out of this session");
+          span.setAttr("aria-label", "Исключено из занятия");
         }
       };
       if (q.newHeld) {
@@ -603,9 +603,9 @@ export class ReviewView extends ItemView {
     }
     const buttons = bottom.createDiv({ cls: "fc-buttons" });
     if (this.phase === "front") {
-      const show = buttons.createEl("button", { text: "Show answer", cls: "fc-show-answer" });
+      const show = buttons.createEl("button", { text: "Показать ответ", cls: "fc-show-answer" });
       show.onclick = () => {
-        trace("Show Answer button");
+        trace("Кнопка «Показать ответ»");
         this.showBack();
       };
     } else {
@@ -673,7 +673,7 @@ export class ReviewView extends ItemView {
       this.lastShake = now;
       this.shakePeaks = [];
       if (this.undoStack.length) {
-        new Notice("Undone.");
+        new Notice("Отменено.");
         void this.undo();
       }
     }
@@ -690,10 +690,10 @@ export class ReviewView extends ItemView {
     const ts = new Date(Date.now() + 1).toISOString();
     if (p.leechAction === "suspend") {
       await this.plugin.logEvent({ ts, type: "suspend", key });
-      new Notice("Card was a leech and has been suspended. Fix it on the Leeches screen (deck list).");
+      new Notice("Карточка была пиявкой и приостановлена. Исправьте её на экране «Слабые места» (из списка колод).");
     } else {
       await this.plugin.logEvent({ ts, type: "mark", key, marked: true });
-      new Notice("Card was a leech and has been marked (★). Fix it on the Leeches screen (deck list).");
+      new Notice("Карточка была пиявкой и отмечена (★). Исправьте её на экране «Слабые места» (из списка колод).");
     }
     return ts;
   }
@@ -719,11 +719,11 @@ export class ReviewView extends ItemView {
   private toggleAutoAdvance(): void {
     const p = this.current ? this.plugin.presetFor(this.current.ref.deck) : this.plugin.presetFor(this.deck);
     if (!this.autoAdvance && !p.autoAdvance.questionSecs && !p.autoAdvance.answerSecs) {
-      new Notice("Set the Auto Advance seconds in Deck options first.");
+      new Notice("Сначала задайте секунды автоперехода в параметрах колоды.");
       return;
     }
     this.autoAdvance = !this.autoAdvance;
-    new Notice(this.autoAdvance ? "Auto Advance started." : "Auto Advance stopped.");
+    new Notice(this.autoAdvance ? "Автопереход запущен." : "Автопереход остановлен.");
     this.renderCard();
   }
 
@@ -761,7 +761,7 @@ export class ReviewView extends ItemView {
     const on = !this.isCrowned(item.ref);
     await this.plugin.setCrowns([item.ref], on);
     if (this.current !== item) return;
-    new Notice(on ? "Answers now reveal one by one." : "Answers now show all at once.");
+    new Notice(on ? "Ответы теперь открываются по одному." : "Ответы теперь показываются все сразу.");
     // Crowns open on the back; turning them off shows the back with everything revealed.
     this.phase = "back";
     this.renderCard();
@@ -772,7 +772,7 @@ export class ReviewView extends ItemView {
     const answers = Array.from(question.querySelectorAll<HTMLElement>("mark.fc-answer"));
     if (answers.length === 0) return;
     const crowns = answers.map((m, i) => {
-      const crown = createSpan({ cls: "fc-crown", text: "🦴", attr: { "aria-label": "Reveal this answer", role: "button" } });
+      const crown = createSpan({ cls: "fc-crown", text: "🦴", attr: { "aria-label": "Открыть этот ответ", role: "button" } });
       crown.onclick = (e) => {
         e.stopPropagation();
         this.revealCrown(i);
@@ -787,12 +787,12 @@ export class ReviewView extends ItemView {
     for (const l of later) l.addClass("fc-crown-later");
     const bar = backEl.createDiv({ cls: "fc-crown-bar" });
     backEl.prepend(bar);
-    const next = bar.createEl("button", { text: "Reveal next (N)" });
+    const next = bar.createEl("button", { text: "Открыть следующий (N)" });
     next.onclick = (e) => {
       e.stopPropagation();
       this.revealNext();
     };
-    const all = bar.createEl("button", { text: "Toggle all (,)" });
+    const all = bar.createEl("button", { text: "Переключить все (,)" });
     all.onclick = (e) => {
       e.stopPropagation();
       this.toggleAllCrowns();
@@ -893,7 +893,7 @@ export class ReviewView extends ItemView {
       trace(`ensureKey -> ${key}`);
       if (def && key && oldUid !== key) await this.plugin.renameFilteredCard(oldUid, key);
       if (!key) {
-        new Notice("This card changed in its note since it was shown. It will come back once the note is re-read.");
+        new Notice("Карточка изменилась в своей заметке с момента показа. Она вернётся, когда заметка будет перечитана.");
         this.current = undefined;
         this.showFront();
         return;
@@ -1038,7 +1038,7 @@ export class ReviewView extends ItemView {
       const ts = new Date().toISOString();
       await this.plugin.logEvent({ ts, type, key });
       this.undoStack.push({ key, ts });
-      new Notice(type === "bury" ? "Card buried until tomorrow." : "Card suspended.");
+      new Notice(type === "bury" ? "Карточка отложена до завтра." : "Карточка приостановлена.");
       this.current = undefined;
       this.showFront();
     } finally {
@@ -1051,7 +1051,7 @@ export class ReviewView extends ItemView {
     const related = this.relatedFor(ref);
     if (!related.length) return;
     const row = backEl.createDiv({ cls: "fc-related" });
-    row.createSpan({ cls: "fc-muted", text: "Related: " });
+    row.createSpan({ cls: "fc-muted", text: "Связанное: " });
     related.forEach((f, i) => {
       if (i) row.appendText(" · ");
       const a = row.createEl("a", { text: f.basename, href: "#", cls: "fc-related-link" });
@@ -1087,7 +1087,7 @@ export class ReviewView extends ItemView {
   private heldNote(q: Queue): string {
     const n = q.newHeld ?? 0;
     const at = this.plugin.settings.adaptiveNewPile;
-    return `${n} new card${n === 1 ? "" : "s"} paused: ${q.pile ?? 0} cards answered today are still in learning. New cards come back at ${at} or fewer (Adaptive new cards, in settings).`;
+    return `На паузе ${n} новых карточек: ${q.pile ?? 0} отвеченных сегодня карточек ещё в изучении. Новые вернутся при ${at} или меньше (Адаптивные новые, в настройках).`;
   }
 
   /** Pick a note to tie to this card; N opens it from then on and it leads the Related row. */
@@ -1099,9 +1099,9 @@ export class ReviewView extends ItemView {
     const suggested = [...new Set([...this.plugin.relatedFor(ref), ...this.plugin.noteMatches(text, 8)])].filter((f) => f.path !== ref.path && !linked.has(f.path));
     new NotePicker(this.plugin, suggested, async (file) => {
       if (await this.plugin.linkNote(ref, file)) {
-        new Notice(`Linked “${file.basename}”. N opens it from this card.`);
+        new Notice(`Привязана заметка «${file.basename}». N откроет её с этой карточки.`);
         this.renderCard();
-      } else new Notice("Couldn't link a note to this card.");
+      } else new Notice("Не удалось привязать заметку к этой карточке.");
     }).open();
   }
 
@@ -1109,7 +1109,7 @@ export class ReviewView extends ItemView {
     const ref = this.current?.ref;
     if (!ref) return;
     await this.plugin.unlinkNote(ref, file.path);
-    new Notice(`Unlinked “${file.basename}”.`);
+    new Notice(`Заметка «${file.basename}» отвязана.`);
     this.renderCard();
   }
 
@@ -1131,7 +1131,7 @@ export class ReviewView extends ItemView {
       if (this.app.metadataCache.getFileCache(file)?.frontmatter?.["anki-deck"]) {
         const related = this.relatedFor(ref)[0];
         if (related) return this.openInSide(related);
-        new Notice("No note of yours matches this card. Link one with ⋯ → Link a note to this card. Opening the imported deck's card file.", 8000);
+        new Notice("Ваша заметка к этой карточке не находится. Привяжите через ⋯ → Привязать заметку к карточке. Открываю файл карточки импортированной колоды.", 8000);
       }
     }
     return this.openInSide(file, ref.card.startLine, ref.card.endLine);
@@ -1253,9 +1253,9 @@ class NotePicker extends SuggestModal<NotePick> {
   ) {
     super(plugin.app);
     this.limit = 30;
-    this.setPlaceholder("Link which note to this card? Type to search");
-    this.emptyStateText = "No note found.";
-    this.setInstructions([{ command: "", purpose: this.omnisearch() ? "Searching inside your notes with Omnisearch" : "Searching titles and headings" }]);
+    this.setPlaceholder("Какую заметку привязать к карточке? Введите текст для поиска");
+    this.emptyStateText = "Заметка не найдена.";
+    this.setInstructions([{ command: "", purpose: this.omnisearch() ? "Идёт поиск внутри ваших заметок через Omnisearch" : "Идёт поиск по заголовкам и подзаголовкам" }]);
   }
 
   private omnisearch(): Omnisearch | undefined {
@@ -1271,7 +1271,7 @@ class NotePicker extends SuggestModal<NotePick> {
 
   async getSuggestions(query: string): Promise<NotePick[]> {
     const q = query.trim();
-    if (!q) return this.suggested.map((file) => ({ file, detail: "Looks related to this card" }));
+    if (!q) return this.suggested.map((file) => ({ file, detail: "Похоже связано с этой карточкой" }));
     const omni = this.omnisearch();
     if (omni) {
       try {

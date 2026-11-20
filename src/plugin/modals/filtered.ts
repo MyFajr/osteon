@@ -26,7 +26,7 @@ export class FilteredDeckModal extends Modal {
       ? { ...existing }
       : {
           id: newId(plugin),
-          name: `Filtered Deck ${plugin.settings.filteredDecks.length + 1}`,
+          name: `Фильтрованная колода ${plugin.settings.filteredDecks.length + 1}`,
           search: "is:due",
           limit: 100,
           order: "random",
@@ -38,16 +38,16 @@ export class FilteredDeckModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     const editing = this.plugin.settings.filteredDecks.some((d) => d.id === this.def.id);
-    this.setTitle(editing ? `Filtered deck: ${this.def.name}` : "Create filtered deck");
+    this.setTitle(editing ? `Фильтровальная колода: ${this.def.name}` : "Создать фильтрованную колоду");
     new Setting(contentEl).setName("Name").addText((t) => t.setValue(this.def.name).onChange((v) => (this.def.name = v.trim() || this.def.name)));
     const matchEl = contentEl.createDiv({ cls: "fc-muted fc-filtered-match" });
     const updateMatch = () => {
       const n = buildFiltered(this.plugin.items(null), { ...this.def, limit: Number.MAX_SAFE_INTEGER }, Date.now(), this.plugin.settings.dayStartHour, this.plugin.searchCtx).length;
-      matchEl.setText(`${n.toLocaleString()} card${n === 1 ? "" : "s"} match (suspended and buried cards are left out).`);
+      matchEl.setText(`Подходит карточек: ${n.toLocaleString()} (приостановленные и отложенные не учитываются).`);
     };
     new Setting(contentEl)
-      .setName("Search")
-      .setDesc("Anki's search: deck:OrthoKing is:due, tag:knee, rated:7:1, prop:ivl>30, is:new …")
+      .setName("Поиск")
+      .setDesc("Поиск Anki: deck:OrthoKing is:due, tag:knee, rated:7:1, prop:ivl>30, is:new …")
       .addText((t) => {
         t.setValue(this.def.search).onChange((v) => {
           this.def.search = v;
@@ -57,40 +57,40 @@ export class FilteredDeckModal extends Modal {
       });
     contentEl.appendChild(matchEl);
     updateMatch();
-    new Setting(contentEl).setName("Limit to").addText((t) =>
+    new Setting(contentEl).setName("Ограничить до").addText((t) =>
       t.setValue(String(this.def.limit)).onChange((v) => {
         const n = Math.floor(Number(v));
         if (n > 0) this.def.limit = n;
       }),
     );
-    new Setting(contentEl).setName("Cards selected by").addDropdown((d) => {
+    new Setting(contentEl).setName("Карточки отбираются по").addDropdown((d) => {
       for (const [k, label] of Object.entries(FILTERED_ORDERS)) d.addOption(k, label);
       d.setValue(this.def.order).onChange((v) => (this.def.order = v as FilteredOrder));
     });
     new Setting(contentEl)
-      .setName("Reschedule cards based on my answers in this deck")
-      .setDesc("Off: a preview/cram session. Answers aren't recorded, and cards keep their schedule.")
+      .setName("Перепланировать карточки по моим ответам в этой колоде")
+      .setDesc("Выкл.: сеанс предпросмотра/зубрёжки. Ответы не записываются, карточки сохраняют расписание.")
       .addToggle((t) => t.setValue(this.def.reschedule).onChange((v) => (this.def.reschedule = v)));
     const buttons = new Setting(contentEl);
     if (editing) {
       buttons.addButton((b) =>
         destructive(b)
-          .setButtonText("Delete")
+          .setButtonText("Удалить")
           .onClick(async () => {
             await this.plugin.deleteFilteredDeck(this.def.id);
             this.close();
           }),
       );
     }
-    buttons.addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()));
+    buttons.addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()));
     buttons.addButton((b) =>
       b
-        .setButtonText(editing ? "Rebuild" : "Build")
+        .setButtonText(editing ? "Пересобрать" : "Собрать")
         .setCta()
         .onClick(async () => {
           const n = await this.plugin.buildFilteredDeck(this.def);
           this.close();
-          if (!n) new Notice("No cards matched the search.");
+          if (!n) new Notice("По поиску не нашлось ни одной карточки.");
           else void this.plugin.openFiltered(this.def.id);
         }),
     );
@@ -102,12 +102,12 @@ export class FilteredDeckModal extends Modal {
 }
 
 const KINDS: Array<[CustomStudyKind, string, string]> = [
-  ["newLimit", "Increase today's new card limit", "Increase today's new card limit by"],
-  ["reviewLimit", "Increase today's review card limit", "Increase today's review limit by"],
-  ["forgotten", "Review forgotten cards", "Review cards forgotten in last x days:"],
-  ["ahead", "Review ahead", "Review ahead by x days:"],
-  ["preview", "Preview new cards", "Preview this many new cards:"],
-  ["state", "Study by card state or tag", "Select this many cards:"],
+  ["newLimit", "Увеличить сегодняшний лимит новых карточек", "Насколько увеличить сегодняшний лимит новых карточек:"],
+  ["reviewLimit", "Увеличить сегодняшний лимит карточек повторения", "Насколько увеличить сегодняшний лимит повторений:"],
+  ["forgotten", "Повторить забытые карточки", "Повторить карточки, забытые за последние N дней:"],
+  ["ahead", "Повторить вперёд", "Повторить вперёд на N дней:"],
+  ["preview", "Предпросмотр новых карточек", "Сколько новых карточек предпросмотреть:"],
+  ["state", "Учить по состоянию карточек или тегам", "Выбрать столько карточек:"],
 ];
 
 const DEFAULTS: Record<CustomStudyKind, number> = { newLimit: 10, reviewLimit: 50, forgotten: 1, ahead: 1, preview: 20, state: 100 };
@@ -134,7 +134,7 @@ export class CustomStudyModal extends Modal {
   private render(): void {
     const { contentEl } = this;
     contentEl.empty();
-    this.setTitle(`Custom Study${this.deck ? `: ${this.deck.split("/").pop()}` : ""}`);
+    this.setTitle(`Своё занятие${this.deck ? `: ${this.deck.split("/").pop()}` : ""}`);
     const list = contentEl.createDiv({ cls: "fc-cs-kinds" });
     for (const [k, label] of KINDS) {
       const row = list.createEl("label", { cls: "fc-radio fc-cs-kind" });
@@ -151,8 +151,8 @@ export class CustomStudyModal extends Modal {
     const q = this.plugin.queue(this.deck);
     const c = counts(q);
     const hint = contentEl.createDiv({ cls: "fc-muted fc-cs-hint" });
-    if (this.kind === "newLimit") hint.setText(`New cards left today: ${c.fresh}.`);
-    if (this.kind === "reviewLimit") hint.setText(`Reviews left today: ${c.review}.`);
+    if (this.kind === "newLimit") hint.setText(`Новых осталось на сегодня: ${c.fresh}.`);
+    if (this.kind === "reviewLimit") hint.setText(`Повторений осталось на сегодня: ${c.review}.`);
     const label = KINDS.find((x) => x[0] === this.kind)![2];
     new Setting(contentEl).setName(label).addText((t) =>
       t.setValue(String(this.n)).onChange((v) => {
@@ -161,22 +161,22 @@ export class CustomStudyModal extends Modal {
       }),
     );
     if (this.kind === "state") {
-      new Setting(contentEl).setName("Cards").addDropdown((d) =>
+      new Setting(contentEl).setName("Карточки").addDropdown((d) =>
         d
-          .addOption("newRandom", "New cards only")
-          .addOption("due", "Due cards only")
-          .addOption("reviewRandom", "All review cards in random order")
-          .addOption("allRandom", "All cards in random order (don't reschedule)")
+          .addOption("newRandom", "Только новые")
+          .addOption("due", "Только карточки к сроку")
+          .addOption("reviewRandom", "Все карточки повторений в случайном порядке")
+          .addOption("allRandom", "Все карточки в случайном порядке (без перепланирования)")
           .setValue(this.state)
           .onChange((v) => (this.state = v as CustomStudyState)),
       );
       new Setting(contentEl)
-        .setName("Only these tags")
-        .setDesc("Optional, separated by spaces, e.g. knee high-yield.")
+        .setName("Только эти теги")
+        .setDesc("Необязательно, через пробел, напр. колено high-yield.")
         .addText((t) => t.setValue(this.tags).onChange((v) => (this.tags = v)));
     }
     new Setting(contentEl)
-      .addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()))
       .addButton((b) => b.setButtonText("OK").setCta().onClick(() => void this.ok()));
   }
 
@@ -189,12 +189,12 @@ export class CustomStudyModal extends Modal {
       return;
     }
     const made = customStudyDeck(deck, this.kind, this.n, { state: this.state, tags: this.tags, limit: this.n });
-    // Like Anki, Custom Study reuses one "Custom Study Session" deck.
+    // Like Anki, Custom Study reuses one "Своё занятие" deck.
     const existing = plugin.settings.filteredDecks.find((d) => d.name === made.name);
     const def: FilteredDeck = { ...made, id: existing?.id ?? newId(plugin) };
     const n = await plugin.buildFilteredDeck(def);
     this.close();
-    if (!n) new Notice("No cards matched these options.");
+    if (!n) new Notice("Под эти параметры не подошло ни одной карточки.");
     else void plugin.openFiltered(def.id);
   }
 

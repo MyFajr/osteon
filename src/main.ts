@@ -57,7 +57,7 @@ export default class FlashcardsPlugin extends Plugin {
   gamepad!: GamepadService;
   links!: LinkService;
   exams!: ExamService;
-  /** What `note:` and `missed:` searches need: linked notes (spec 0011) and exam misses (spec 0012). */
+  /** What `note:` и `missed:` searches need: linked notes (spec 0011) and exam misses (spec 0012). */
   searchCtx: SearchContext = {
     linked: (ref: CardRef) => this.links?.notesFor(ref) ?? [],
     missed: (path: string) => this.exams?.missed(path) ?? 0,
@@ -156,8 +156,8 @@ export default class FlashcardsPlugin extends Plugin {
         this.terms.decorate(el, ctx.sourcePath);
       });
     });
-    this.addCommand({ id: "open-my-terms", name: "Open My terms (definitions for the term hover)", callback: () => void this.terms.openMyTerms() });
-    this.addCommand({ id: "ai-find-terms", name: "Find hard terms with AI now", callback: () => void this.ai.runWithConfirm() });
+    this.addCommand({ id: "open-my-terms", name: "Открыть «Мои термины» (определения для подсказок терминов)", callback: () => void this.terms.openMyTerms() });
+    this.addCommand({ id: "ai-find-terms", name: "Найти сложные термины с помощью ИИ", callback: () => void this.ai.runWithConfirm() });
 
     this.registerView(VIEW_DECKS, (leaf) => new DeckView(leaf, this));
     this.registerView(VIEW_REVIEW, (leaf) => new ReviewView(leaf, this));
@@ -169,31 +169,31 @@ export default class FlashcardsPlugin extends Plugin {
     this.registerView(VIEW_WEAK, (leaf) => new WeakView(leaf, this));
     this.addSettingTab(new FlashcardsSettingTab(this.app, this));
 
-    this.addRibbonIcon("layers", "Osteon: decks", () => this.openDecks());
-    this.addCommand({ id: "open-decks", name: "Open decks", callback: () => this.openDecks() });
-    this.addCommand({ id: "study-all", name: "Study all decks", callback: () => this.openReview(null) });
-    this.addCommand({ id: "browse", name: "Browse cards", callback: () => this.openBrowse() });
-    this.addCommand({ id: "stats", name: "Statistics", callback: () => this.openStats(null) });
-    this.addCommand({ id: "filtered-deck", name: "Create filtered deck", callback: () => new FilteredDeckModal(this.app, this).open() });
-    this.addCommand({ id: "custom-study", name: "Custom study (all decks)", callback: () => new CustomStudyModal(this.app, this, null).open() });
-    this.addCommand({ id: "add-card", name: "Add card", callback: () => this.openAddCard(null) });
-    this.addCommand({ id: "import-exam", name: "Import exam results (missed questions)…", callback: () => new ExamImportModal(this.app, this).open() });
-    this.addCommand({ id: "open-misses", name: "What I keep missing", callback: () => this.openMisses() });
-    this.addCommand({ id: "ai-helper", name: "Open the AI helper (side panel)", callback: () => void this.openAssistant() });
-    this.addCommand({ id: "open-leeches", name: "Leeches (cards I keep forgetting)", callback: () => this.openLeeches() });
-    this.addCommand({ id: "open-weak", name: "Weak spots (cards and topics I missed most)", callback: () => this.openWeak() });
+    this.addRibbonIcon("layers", "Osteon: колоды", () => this.openDecks());
+    this.addCommand({ id: "open-decks", name: "Открыть колоды", callback: () => this.openDecks() });
+    this.addCommand({ id: "study-all", name: "Учить все колоды", callback: () => this.openReview(null) });
+    this.addCommand({ id: "browse", name: "Обзор карточек", callback: () => this.openBrowse() });
+    this.addCommand({ id: "stats", name: "Статистика", callback: () => this.openStats(null) });
+    this.addCommand({ id: "filtered-deck", name: "Создать фильтрованную колоду", callback: () => new FilteredDeckModal(this.app, this).open() });
+    this.addCommand({ id: "custom-study", name: "Своё занятие (все колоды)", callback: () => new CustomStudyModal(this.app, this, null).open() });
+    this.addCommand({ id: "add-card", name: "Добавить карточку", callback: () => this.openAddCard(null) });
+    this.addCommand({ id: "import-exam", name: "Импортировать результаты экзамена (пропущенные вопросы)…", callback: () => new ExamImportModal(this.app, this).open() });
+    this.addCommand({ id: "open-misses", name: "Что не даётся", callback: () => this.openMisses() });
+    this.addCommand({ id: "ai-helper", name: "Открыть ИИ-помощника (боковая панель)", callback: () => void this.openAssistant() });
+    this.addCommand({ id: "open-leeches", name: "Пиявки (карточки, которые я всё время забываю)", callback: () => this.openLeeches() });
+    this.addCommand({ id: "open-weak", name: "Слабые места (карточки и темы, где я чаще всего ошибаюсь)", callback: () => this.openWeak() });
     this.addCommand({
       id: "reload-links",
-      name: "Reload linked-note tables (*.cardlinks.json)",
+      name: "Перезагрузить таблицы привязок заметок (*.cardlinks.json)",
       callback: async () => {
         await this.links.rebuild();
         await this.exams.load();
-        new Notice(`${this.links.size.toLocaleString()} imported cards are linked to notes.`);
+        new Notice(`К заметкам привязано ${this.links.size.toLocaleString()} импортированных карточек.`);
       },
     });
     this.addCommand({
       id: "study-note",
-      name: "Study this note's cards (its own and linked ones)",
+      name: "Учить карточки этой заметки (её собственные и привязанные)",
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
@@ -201,13 +201,13 @@ export default class FlashcardsPlugin extends Plugin {
         return true;
       },
     });
-    this.addCommand({ id: "import-apkg", name: "Import deck (.apkg)…", callback: () => pickAndImportApkg(this) });
-    this.addCommand({ id: "copy-anki-media", name: "Copy deck pictures into the vault (desktop)…", callback: () => new AnkiMediaModal(this.app, this).open() });
-    this.addCommand({ id: "migrate-sr", name: "Migrate from Spaced Repetition…", callback: () => new MigrateModal(this.app, this).open() });
-    this.addCommand({ id: "rewrite-list", name: "Find cards to rewrite", callback: () => new RewriteListModal(this.app, this).open() });
+    this.addCommand({ id: "import-apkg", name: "Импортировать колоду (.apkg)…", callback: () => pickAndImportApkg(this) });
+    this.addCommand({ id: "copy-anki-media", name: "Скопировать картинки колод в хранилище (настольная версия)…", callback: () => new AnkiMediaModal(this.app, this).open() });
+    this.addCommand({ id: "migrate-sr", name: "Перенести из Spaced Repetition…", callback: () => new MigrateModal(this.app, this).open() });
+    this.addCommand({ id: "rewrite-list", name: "Найти карточки для переработки", callback: () => new RewriteListModal(this.app, this).open() });
     this.addCommand({
       id: "create-occlusion",
-      name: "Create image occlusion from the image on this line",
+      name: "Создать скрытие изображения из картинки в этой строке",
       editorCheckCallback: (checking, editor, ctx) => {
         const lineNo = editor.getCursor().line;
         const embed = imageEmbeds(editor.getLine(lineNo))[0];
@@ -222,13 +222,13 @@ export default class FlashcardsPlugin extends Plugin {
         const embed = imageEmbeds(editor.getLine(lineNo))[0];
         if (!embed || !info.file) return;
         const path = info.file.path;
-        menu.addItem((i) => i.setTitle("Create image occlusion").setIcon("square-dashed").onClick(() => this.createOcclusion(editor, path, lineNo, embed)));
+        menu.addItem((i) => i.setTitle("Создать скрытие изображения").setIcon("square-dashed").onClick(() => this.createOcclusion(editor, path, lineNo, embed)));
       }),
     );
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => {
         if (!(file instanceof TFile) || file.extension !== "md") return;
-        menu.addItem((i) => i.setTitle("Study this note's cards").setIcon("layers").onClick(() => void this.studyNote(file)));
+        menu.addItem((i) => i.setTitle("Учить карточки этой заметки").setIcon("layers").onClick(() => void this.studyNote(file)));
       }),
     );
     // Occlusion blocks show as the figure in notes, with faint outlines and an Edit button.
@@ -237,12 +237,12 @@ export default class FlashcardsPlugin extends Plugin {
       el.addClass("fc-io-block");
       renderFigure(this.app, el, occ, ctx.sourcePath, { active: [], phase: "note", zoomable: true });
       const bar = el.createDiv({ cls: "fc-io-block-bar" });
-      bar.createSpan({ cls: "fc-muted", text: `${occ.masks.length} box${occ.masks.length === 1 ? "" : "es"} · ${occ.mode === "hide-all" ? "hide all" : "hide one"}` });
-      const edit = bar.createEl("button", { text: "Edit occlusion" });
+      bar.createSpan({ cls: "fc-muted", text: `${occ.masks.length} box${occ.masks.length === 1 ? "" : "es"} · ${occ.mode === "hide-all" ? "скрыть всё" : "скрыть один"}` });
+      const edit = bar.createEl("button", { text: "Изменить скрытие" });
       edit.onclick = () => {
         const info = ctx.getSectionInfo(el);
         if (!info) {
-          new Notice("Open the note in editing or reading view to edit this figure.");
+          new Notice("Откройте заметку в режиме правки или чтения, чтобы изменить эту картинку.");
           return;
         }
         const expected = info.text.split("\n").slice(info.lineStart, info.lineEnd + 1);
@@ -345,7 +345,7 @@ export default class FlashcardsPlugin extends Plugin {
         this.register(() => window.clearTimeout(first));
       } catch (e) {
         console.error("Flashcards: startup failed", e);
-        new Notice("Osteon couldn't finish loading. See the developer console for details.");
+        new Notice("Osteon не смог завершить загрузку. Подробности в консоли разработчика.");
       } finally {
         this.ready = true;
         this.events.trigger("changed");
@@ -480,7 +480,7 @@ export default class FlashcardsPlugin extends Plugin {
       await this.logs.append(full);
     } catch (err) {
       console.error("Flashcards: couldn't save an event to the review log", full, err);
-      new Notice("A review couldn't be saved to disk (see the developer console). Keep Obsidian open and try again.", 10000);
+      new Notice("Не удалось сохранить повторение на диск (смотрите консоль разработчика). Держите Obsidian открытым и попробуйте снова.", 10000);
       throw err;
     }
   }
@@ -569,7 +569,7 @@ export default class FlashcardsPlugin extends Plugin {
     return this.settings.hiddenDecks.includes(deck.toLowerCase());
   }
 
-  /** Hide a deck from the deck list and "Study all", or show it again. Its cards are untouched. */
+  /** Hide a deck from the deck list and "Учить всё", or show it again. Its cards are untouched. */
   async setDeckHidden(deck: string, hide: boolean): Promise<void> {
     const k = deck.toLowerCase();
     const rest = this.settings.hiddenDecks.filter((d) => d !== k);
@@ -622,7 +622,7 @@ export default class FlashcardsPlugin extends Plugin {
     );
   }
 
-  /** Custom Study's "increase today's limit" for a deck (0 once the study day is over). */
+  /** Custom Study's "увеличить сегодняшний лимит" for a deck (0 once the study day is over). */
   todayExtra(deck: string | null, now = new Date()): { newExtra: number; reviewExtra: number } {
     const e = this.settings.todayExtra[(deck ?? "").toLowerCase()];
     const today = dayStart(now.getTime(), this.settings.dayStartHour);
@@ -680,21 +680,21 @@ export default class FlashcardsPlugin extends Plugin {
   }
 
   /**
-   * "Study this note's cards": a filtered deck of the note's own cards plus every card linked to
+   * "Учить карточки этой заметки": a filtered deck of the note's own cards plus every card linked to
    * it (spec 0011), due first, answers counting as normal reviews. Reuses one deck per note.
    */
   async studyNote(file: TFile): Promise<void> {
-    await this.studySearch(`Note: ${file.basename}`, `note:"${file.path}"`, `No cards in or linked to "${file.basename}"`);
+    await this.studySearch(`Note: ${file.basename}`, `note:"${file.path}"`, `Нет карточек в «${file.basename}» и привязанных к ней`);
   }
 
   /** Build (or rebuild) the named filtered deck from a search, due first, and start it. */
-  async studySearch(name: string, search: string, empty = `No cards match ${search}`): Promise<void> {
+  async studySearch(name: string, search: string, empty = `Нет карточек по запросу ${search}`): Promise<void> {
     const existing = this.settings.filteredDecks.find((d) => d.name === name);
     const def: FilteredDeck = existing ?? { id: `s-${Date.now().toString(36)}`, name, search, limit: 9999, order: "due", reschedule: true };
     def.search = search;
     const n = await this.buildFilteredDeck(def);
     if (!n) {
-      new Notice(`${empty} (suspended and buried cards are left out).`);
+      new Notice(`${empty} (приостановленные и отложенные карточки не учитываются).`);
       if (!existing) await this.deleteFilteredDeck(def.id);
       return;
     }
@@ -773,8 +773,8 @@ export default class FlashcardsPlugin extends Plugin {
     if (dups.size === 0) return;
     const [id, paths] = [...dups][0];
     new Notice(
-      `Osteon: ${dups.size} card ID(s) appear more than once (e.g. ^fc-${id} in ${paths.join(" and ")}). ` +
-        "They share one history until one copy's ID is removed.",
+      `Osteon: ${dups.size} card ID(s) appear more than once (e.g. ^fc-${id} in ${paths.join(" и ")}). ` +
+        "Они делят одну историю, пока ID одной из копий не будет удалён.",
       10000,
     );
   }
@@ -821,7 +821,7 @@ export default class FlashcardsPlugin extends Plugin {
   private createOcclusion(editor: Editor, path: string, lineNo: number, embed: string): void {
     const line = editor.getLine(lineNo);
     if (line.trim() !== embed.trim()) {
-      new Notice("Put the image on a line of its own first, then create the occlusion.");
+      new Notice("Сначала поместите картинку на отдельную строку, затем создайте скрытие.");
       return;
     }
     const wiki = /^!\[\[([^\]|#]+)/.exec(embed);
@@ -838,7 +838,7 @@ export default class FlashcardsPlugin extends Plugin {
     const initial: Occlusion = { image, mode: "hide-all", masks: [], groups: [] };
     new OcclusionEditorModal(this.app, initial, path, [], async (occ) => {
       if (editor.getLine(lineNo) !== line) {
-        new Notice("The note changed while the editor was open; the figure wasn't inserted.");
+        new Notice("Заметка изменилась, пока был открыт редактор; картинка не вставлена.");
         return false;
       }
       const block = "```" + OCCLUSION_LANG + "\n" + serializeOcclusion(occ) + "\n```";
@@ -846,7 +846,7 @@ export default class FlashcardsPlugin extends Plugin {
       // A figure in a note the plugin does not read makes no cards: say so instead of staying quiet.
       const file = this.app.vault.getFileByPath(path);
       if (file && !this.index.shouldScan(file, this.app.metadataCache.getFileCache(file))) {
-        new Notice("Figure saved. Add the #flashcards tag to this note so its cards show up in your decks.", 10000);
+        new Notice("Картинка сохранена. Добавьте этой заметке тег #flashcards, чтобы её карточки появились в колодах.", 10000);
       }
       return true;
     }).open();
@@ -859,7 +859,7 @@ export default class FlashcardsPlugin extends Plugin {
   editOcclusion(path: string, startLine: number, expected: string[], occ: Occlusion, onSaved?: () => void): void {
     const closeIdx = expected.findIndex((l, i) => i > 0 && /^\s*(`{3,}|~{3,})\s*$/.test(l));
     if (closeIdx < 0 || !/^\s*(`{3,}|~{3,})/.test(expected[0])) {
-      new Notice("This figure is inside a quote or callout; move it out to edit it.");
+      new Notice("Картинка находится внутри цитаты или callout; вынесите её оттуда, чтобы редактировать.");
       return;
     }
     const fence = expected.slice(0, closeIdx + 1);
@@ -878,7 +878,7 @@ export default class FlashcardsPlugin extends Plugin {
         return written;
       });
       if (!ok) {
-        new Notice("The note changed while the editor was open; reopen the figure and try again.");
+        new Notice("Заметка изменилась, пока был открыт редактор; переоткройте картинку и попробуйте снова.");
         return false;
       }
       this.index.updateFromText(file, written);
@@ -1053,7 +1053,7 @@ export default class FlashcardsPlugin extends Plugin {
     const paths = samplePaths(pics.map((f) => f.path), 5);
     const res = await probeDownloads((p) => this.app.vault.adapter.readBinary(p), paths, 4000);
     if (!res.missing) return;
-    console.warn("Osteon: pictures not readable in time", paths, res);
+    console.warn("Osteon: картинки не успели прочитаться", paths, res);
     new Notice(
       `Osteon: ${res.missing} of ${res.checked} pictures checked aren't downloaded to this device. Cards and notes with pictures may hang. In the Files app, long-press the vault folder and choose Keep Downloaded.`,
       20000,

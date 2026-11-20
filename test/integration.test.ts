@@ -213,11 +213,11 @@ describe("which device wrote what (0.20.0)", () => {
       now,
     );
     expect(lines).toHaveLength(2);
-    expect(lines[0]).toMatch(/^Latest from iPhone: today 7:46\s?PM · that answer was on Osteon 0\.19\.8$/i);
+    expect(lines[0]).toMatch(/^Последний ответ от iPhone: сегодня в 7:46\s?PM · тот ответ был на Osteon 0\.19\.8$/i);
     const d = { "iphone-2222": { last: at(4, 19, 46), version: "0.24.0" } };
     expect(syncLines(d, "mac-1111", "0.24.0", now)[0]).toMatch(/· Osteon 0\.24\.0$/);
-    expect(syncLines(d, "mac-1111", "0.9.9", now)[0]).toMatch(/· Osteon 0\.24\.0 \(newer than this device: restart Obsidian here to update\)$/);
-    expect(lines[1]).toMatch(/^Latest from iPad: Oct 1, 9:05\s?AM$/i);
+    expect(syncLines(d, "mac-1111", "0.9.9", now)[0]).toMatch(/· Osteon 0\.24\.0 \(новее этого устройства: перезапустите Obsidian здесь, чтобы обновить\)$/);
+    expect(lines[1]).toMatch(/^Последний ответ от iPad: Oct 1, 9:05\s?AM$/i);
   });
 
   it("undoing the answer that made a card a leech also takes back its suspend", () => {

@@ -58,7 +58,7 @@ export function renderFigure(app: App, container: HTMLElement, occ: Occlusion, s
   const file = resolveImage(app, occ.image, sourcePath);
   const wrap = container.createDiv({ cls: "fc-io" });
   if (!file) {
-    wrap.createDiv({ cls: "fc-io-missing", text: `Image not found: ${occ.image}` });
+    wrap.createDiv({ cls: "fc-io-missing", text: `Картинка не найдена: ${occ.image}` });
     return false;
   }
   const img = wrap.createEl("img", { attr: { src: app.vault.getResourcePath(file), alt: occ.image, draggable: "false" } });

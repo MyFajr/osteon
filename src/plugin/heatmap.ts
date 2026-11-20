@@ -22,8 +22,8 @@ import type { QueueItem } from "../core/queue";
 const SVG = "http://www.w3.org/2000/svg";
 const CELL = 11;
 const GAP = 2;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+const WEEKDAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
 export interface HeatmapData {
   items: QueueItem[];
@@ -39,13 +39,27 @@ export function heatmapData(plugin: FlashcardsPlugin, deck: string | null): Heat
   return { items, rows };
 }
 
-function plural(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
+const PLURAL_FORMS: Record<string, [string, string, string]> = {
+  card: ["карточка", "карточки", "карточек"],
+  review: ["повторение", "повторения", "повторений"],
+  day: ["день", "дня", "дней"],
+  "дн.": ["дн.", "дн.", "дн."],
+  "дней": ["дней", "дней", "дней"],
+};
+
+export function plural(n: number, word: string): string {
+  const f = PLURAL_FORMS[word];
+  if (!f) return `${n} ${word}${n === 1 ? "" : "s"}`;
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return `${n} ${f[0]}`;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return `${n} ${f[1]}`;
+  return `${n} ${f[2]}`;
 }
 
 export function dateLabel(day: number): string {
   const d = dayDate(day);
-  return `${WEEKDAYS[d.getUTCDay()]} ${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+  return `${WEEKDAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 /** A tooltip that follows the pointer, shared by the heatmap and the charts. */
@@ -99,15 +113,15 @@ export function renderHeatmap(
     const b = nav.createEl("button", { cls: "fc-hm-btn", text: icon, attr: { "aria-label": label } });
     b.onclick = fn;
   };
-  btn("‹", "Previous year", () => {
+  btn("‹", "Предыдущий год", () => {
     yearState.year = year - 1;
     onYear();
   });
-  btn("○", "This year", () => {
+  btn("○", "Текущий год", () => {
     yearState.year = undefined;
     onYear();
   });
-  btn("›", "Next year", () => {
+  btn("›", "Следующий год", () => {
     yearState.year = year + 1;
     onYear();
   });
@@ -160,13 +174,13 @@ export function renderHeatmap(
       const n = activity.get(d) ?? 0;
       // Today shows what's been done; the day's remaining due cards show in its tooltip.
       cls = `fc-hm-day fc-hm-l${heatLevel(n, th)}`;
-      label = `${plural(n, "review")} on ${dateLabel(d)}`;
-      if (d === today && due.get(d)) label += `\n${plural(due.get(d)!, "card")} due`;
+      label = `${plural(n, "review")} ${dateLabel(d)}`;
+      if (d === today && due.get(d)) label += `\n${plural(due.get(d)!, "card")} к сроку`;
       if (n) search = `prop:rated=${d - today}${deckTerm}`;
     } else {
       const n = due.get(d) ?? 0;
       cls = `fc-hm-day fc-hm-f${n ? Math.min(4, Math.ceil(heatLevel(n, th) / 2.5)) : 0}`;
-      label = `${plural(n, "card")} due on ${dateLabel(d)}`;
+      label = `${plural(n, "card")} к сроку ${dateLabel(d)}`;
       if (n) search = `prop:due=${d - today}${deckTerm}`;
     }
     if (d === today) cls += " fc-hm-today";
@@ -188,8 +202,8 @@ export function renderHeatmap(
     s.createSpan({ text: `${name}: ` });
     s.createSpan({ cls: `fc-hm-v fc-hm-t${level}`, text: value });
   };
-  stat("Daily average", plural(stats.dailyAvg, "card"), heatLevel(stats.dailyAvg, th), "Average reviews on days you studied");
-  stat("Days learned", `${stats.pctDaysLearned}%`, percentLevel(stats.pctDaysLearned), "Share of days with reviews since your first review");
-  stat("Longest streak", plural(stats.longestStreak, "day"), streakLevel(stats.longestStreak), "Longest run of consecutive days with reviews");
-  stat("Current streak", plural(stats.currentStreak, "day"), streakLevel(stats.currentStreak), "Consecutive days with reviews, up to today");
+  stat("В среднем за день", plural(stats.dailyAvg, "card"), heatLevel(stats.dailyAvg, th), "Среднее число повторений в дни занятий");
+  stat("Дни занятий", `${stats.pctDaysLearned}%`, percentLevel(stats.pctDaysLearned), "Доля дней с повторениями с самого первого");
+  stat("Самая длинная серия", plural(stats.longestStreak, "day"), streakLevel(stats.longestStreak), "Самая длинная серия дней с повторениями подряд");
+  stat("Текущая серия", plural(stats.currentStreak, "day"), streakLevel(stats.currentStreak), "Дни с повторениями подряд до сегодняшнего");
 }

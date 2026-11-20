@@ -4,6 +4,7 @@ import { renderWhenVisible } from "./lazy-render";
 import { SettingsModal } from "../modals/settings";
 import { keyString } from "../settings";
 import { counts } from "../../core/queue";
+import { plural } from "../heatmap";
 import type FlashcardsPlugin from "../../main";
 import { pickAndImportApkg } from "../anki-import";
 import { syncLines } from "../logstore";
@@ -81,7 +82,7 @@ export class DeckView extends ItemView {
     );
     menu.addItem((i) =>
       i
-        .setTitle("Osteon settings")
+        .setTitle("Настройки Osteon")
         .setIcon("sliders-horizontal")
         .onClick(() => new SettingsModal(this.app, this.plugin).open()),
     );
@@ -105,7 +106,7 @@ export class DeckView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Decks";
+    return "Колоды";
   }
 
   getIcon(): string {
@@ -156,26 +157,26 @@ export class DeckView extends ItemView {
         const stale = el.createDiv({ cls: "fc-deck-snapshot" });
         stale.append(sanitizeHTMLToDom(snap.html));
       }
-      el.createDiv({ cls: "fc-muted fc-loading", text: "Loading cards…" });
+      el.createDiv({ cls: "fc-muted fc-loading", text: "Загрузка карточек…" });
       return;
     }
     const root = this.tree();
     if (root.children.size === 0) {
-      el.createEl("h3", { text: "No flashcards yet" });
+      el.createEl("h3", { text: "Пока нет карточек" });
       el.createEl("p", {
-        text: "Add #flashcards to a note, then write a card: a line with a ==cloze==, or Question :: Answer. The lines under it are the back.",
+        text: "Добавьте в заметку тег #flashcards и напишите карточку: строку с ==cloze== или Вопрос :: Ответ. Строки под ней — обратная сторона.",
       });
-      const imp = el.createEl("button", { text: "Import a deck (.apkg)" });
+      const imp = el.createEl("button", { text: "Импортировать колоду (.apkg)" });
       imp.onclick = () => pickAndImportApkg(this.plugin);
       return;
     }
 
     const table = el.createEl("table", { cls: "fc-deck-table" });
     const head = table.createEl("thead").createEl("tr");
-    head.createEl("th", { text: "Deck" });
-    head.createEl("th", { text: "New", cls: "fc-num" });
-    head.createEl("th", { text: "Learn", cls: "fc-num" });
-    head.createEl("th", { text: "Due", cls: "fc-num" });
+    head.createEl("th", { text: "Колода" });
+    head.createEl("th", { text: "Новые", cls: "fc-num" });
+    head.createEl("th", { text: "Изучение", cls: "fc-num" });
+    head.createEl("th", { text: "К сроку", cls: "fc-num" });
     head.createEl("th");
     const body = table.createEl("tbody");
     const now = new Date();
@@ -216,7 +217,7 @@ export class DeckView extends ItemView {
         tr.createEl("td", { text: String(c.fresh), cls: `fc-num fc-new ${c.fresh ? "" : "fc-zero"}` });
         tr.createEl("td", { text: String(c.learning), cls: `fc-num fc-learn ${c.learning ? "" : "fc-zero"}` });
         tr.createEl("td", { text: String(c.review), cls: `fc-num fc-due ${c.review ? "" : "fc-zero"}` });
-        const gear = tr.createEl("td", { cls: "fc-gear" }).createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Deck menu" } });
+        const gear = tr.createEl("td", { cls: "fc-gear" }).createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Меню колоды" } });
         setIcon(gear, "settings");
         gear.onclick = (e) => this.deckMenu(child.path, hidden).showAtMouseEvent(e);
         if (child.children.size && !this.isCollapsed(child.path)) addRows(child, depth + 1);
@@ -230,12 +231,12 @@ export class DeckView extends ItemView {
       const tr = body.createEl("tr", { cls: "fc-filtered-row" });
       const nameCell = tr.createEl("td", { cls: "fc-deck-name fc-deck-name-flat" });
       nameCell.createSpan({ cls: "fc-toggle" });
-      const link = nameCell.createEl("a", { text: def.name, cls: "fc-deck-link fc-filtered-name", attr: { title: `Filtered deck: ${def.search}` } });
+      const link = nameCell.createEl("a", { text: def.name, cls: "fc-deck-link fc-filtered-name", attr: { title: `Фильтровальная колода: ${def.search}` } });
       link.onclick = () => void this.plugin.openFiltered(def.id);
       tr.createEl("td", { text: String(c.fresh), cls: `fc-num fc-new ${c.fresh ? "" : "fc-zero"}` });
       tr.createEl("td", { text: String(c.learning), cls: `fc-num fc-learn ${c.learning ? "" : "fc-zero"}` });
       tr.createEl("td", { text: String(c.review), cls: `fc-num fc-due ${c.review ? "" : "fc-zero"}` });
-      const gear = tr.createEl("td", { cls: "fc-gear" }).createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Filtered deck options" } });
+      const gear = tr.createEl("td", { cls: "fc-gear" }).createEl("button", { cls: "clickable-icon", attr: { "aria-label": "Параметры фильтрованной колоды" } });
       setIcon(gear, "settings");
       gear.onclick = () => new FilteredDeckModal(this.app, this.plugin, def).open();
     }
@@ -261,7 +262,7 @@ export class DeckView extends ItemView {
     const left = info.createDiv({ cls: "fc-deck-info-main" });
     left.createDiv({
       cls: "fc-today",
-      text: `Studied ${t.answers} card${t.answers === 1 ? "" : "s"} in ${mins.toFixed(2)} minutes today (${per}s/card)`,
+      text: `Сегодня изучено ${plural(t.answers, "card")} за ${mins.toFixed(2)} мин (${per} с/карточка)`,
     });
     const line = left.createDiv({ cls: "fc-deck-totals" });
     const part = (label: string, n: number, cls: string) => {
@@ -269,15 +270,15 @@ export class DeckView extends ItemView {
       line.createSpan({ text: String(n), cls: `fc-total-n ${cls}` });
       line.appendText(" ");
     };
-    part("New", totals.fresh, "fc-new");
-    part("Learn", totals.learning, "fc-t-learn");
-    part("Reviews", totals.review, "fc-t-review");
-    part("Due", due, "fc-due");
-    part("Total", total, "fc-t-total");
+    part("Новые", totals.fresh, "fc-new");
+    part("Изучение", totals.learning, "fc-t-learn");
+    part("Повторения", totals.review, "fc-t-review");
+    part("К сроку", due, "fc-due");
+    part("Всего", total, "fc-t-total");
     const right = info.createDiv({ cls: "fc-deck-info-side" });
-    right.createDiv({ text: "Average:" });
-    right.createDiv({ text: cpm ? `${cpm.toFixed(1)} cards/minute` : "—" });
-    right.createDiv({ cls: "fc-time-left", text: cpm ? `${Math.round(total / cpm)} minutes more` : "" });
+    right.createDiv({ text: "Среднее:" });
+    right.createDiv({ text: cpm ? `${cpm.toFixed(1)} карточек/мин` : "—" });
+    right.createDiv({ cls: "fc-time-left", text: cpm ? `осталось около ${Math.round(total / cpm)} мин` : "" });
 
     // Why the numbers are what they are, when the pacing options are holding cards back.
     const s = this.plugin.settings;
@@ -293,8 +294,8 @@ export class DeckView extends ItemView {
         held += dq.newHeld ?? 0;
         if (dq.newHeld) pile = Math.max(pile, dq.pile ?? 0);
       }
-      if (held) notes.push(`${held} new card${held === 1 ? "" : "s"} paused: ${pile} cards answered today are still in learning (new cards come back at ${s.adaptiveNewPile} or fewer).`);
-      if (q.rested) notes.push(`${q.rested} card${q.rested === 1 ? "" : "s"} resting until tomorrow after ${s.restAfterMisses} misses today (see Weak spots).`);
+      if (held) notes.push(`На паузе ${plural(held, "card")}: ${pile} отвеченных сегодня карточек ещё в изучении (новые вернутся при ${s.adaptiveNewPile} или меньше).`);
+      if (q.rested) notes.push(`${plural(q.rested, "card")} ${q.rested === 1 ? "отдыхает" : "отдыхают"} до завтра после ${s.restAfterMisses} промахов сегодня (см. «Слабые места»).`);
       for (const text of notes) el.createDiv({ cls: "fc-muted fc-pacing", text });
     }
 
@@ -302,32 +303,32 @@ export class DeckView extends ItemView {
     if (this.plugin.settings.showHeatmap) renderHeatmap(el, this.plugin, null, hm, this.heatmapYear, () => this.render());
 
     const buttons = el.createDiv({ cls: "fc-deck-buttons" });
-    const all = buttons.createEl("button", { text: "Study all", cls: "mod-cta" });
+    const all = buttons.createEl("button", { text: "Учить всё", cls: "mod-cta" });
     all.onclick = () => this.plugin.openReview(null);
-    const add = buttons.createEl("button", { text: "Add" });
+    const add = buttons.createEl("button", { text: "Добавить" });
     add.onclick = () => this.plugin.openAddCard(null);
-    const browse = buttons.createEl("button", { text: "Browse" });
+    const browse = buttons.createEl("button", { text: "Обзор" });
     browse.onclick = () => this.plugin.openBrowse();
-    const stats = buttons.createEl("button", { text: "Stats" });
+    const stats = buttons.createEl("button", { text: "Статистика" });
     stats.onclick = () => this.plugin.openStats(null);
-    const filtered = buttons.createEl("button", { text: "Create filtered deck" });
+    const filtered = buttons.createEl("button", { text: "Создать фильтрованную колоду" });
     filtered.onclick = () => new FilteredDeckModal(this.app, this.plugin).open();
     const weak = this.plugin.weakToday().length;
-    const wb = buttons.createEl("button", { text: weak ? `Weak spots (${weak})` : "Weak spots" });
-    wb.setAttr("aria-label", "The cards and topics you missed most");
+    const wb = buttons.createEl("button", { text: weak ? `Слабые места (${weak})` : "Слабые места" });
+    wb.setAttr("aria-label", "Карточки и темы, где вы чаще всего ошибались");
     wb.onclick = () => void this.plugin.openWeak();
     const leeches = this.plugin.leeches().length;
     if (leeches) {
       const lb = buttons.createEl("button", { text: `Leeches (${leeches})` });
       lb.onclick = () => void this.plugin.openLeeches();
     }
-    const imp = buttons.createEl("button", { text: "Import deck" });
+    const imp = buttons.createEl("button", { text: "Импорт колоды" });
     imp.onclick = () => pickAndImportApkg(this.plugin);
-    const settings = buttons.createEl("button", { text: "Settings" });
+    const settings = buttons.createEl("button", { text: "Настройки" });
     settings.setAttr("aria-label", "All of Osteon's settings");
     settings.onclick = () => new SettingsModal(this.app, this.plugin).open();
     if (hiddenCount) {
-      const label = this.showHidden ? "Hide Hidden Decks" : `Show Hidden Decks (${hiddenCount})`;
+      const label = this.showHidden ? "Скрыть скрытые колоды" : `Показать скрытые колоды (${hiddenCount})`;
       const toggle = buttons.createEl("button", { text: label, cls: this.showHidden ? "is-active" : "" });
       toggle.onclick = async () => {
         this.showHidden = !this.showHidden;

@@ -16,9 +16,9 @@ import { renderWhenVisible } from "./lazy-render";
 export const VIEW_WEAK = "flashcards-weak";
 
 const RANGES = [
-  { id: "today", label: "Today", days: 0, minMisses: 2 },
-  { id: "week", label: "7 days", days: 7, minMisses: 3 },
-  { id: "month", label: "30 days", days: 30, minMisses: 4 },
+  { id: "today", label: "Сегодня", days: 0, minMisses: 2 },
+  { id: "week", label: "7 дней", days: 7, minMisses: 3 },
+  { id: "month", label: "30 дней", days: 30, minMisses: 4 },
 ] as const;
 const PAGE = 20;
 
@@ -40,7 +40,7 @@ export class WeakView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Weak spots";
+    return "Слабые места";
   }
 
   getIcon(): string {
@@ -65,7 +65,7 @@ export class WeakView extends ItemView {
     this.component.load();
     const { plugin } = this;
     if (!plugin.ready) {
-      el.createDiv({ cls: "fc-muted", text: "Loading cards…" });
+      el.createDiv({ cls: "fc-muted", text: "Загрузка карточек…" });
       return;
     }
     const range = RANGES.find((r) => r.id === this.range)!;
@@ -74,7 +74,7 @@ export class WeakView extends ItemView {
     const items = plugin.studyItems(null);
 
     const head = el.createDiv({ cls: "fc-weak-head" });
-    head.createEl("h3", { text: "Weak spots" });
+    head.createEl("h3", { text: "Слабые места" });
     const tabs = head.createDiv({ cls: "fc-weak-tabs" });
     for (const r of RANGES) {
       const b = tabs.createEl("button", { text: r.label, cls: r.id === this.range ? "mod-cta" : "" });
@@ -85,15 +85,15 @@ export class WeakView extends ItemView {
         this.render();
       };
     }
-    tabs.createEl("button", { text: "Decks" }).onclick = () => plugin.openDecks();
+    tabs.createEl("button", { text: "Колоды" }).onclick = () => plugin.openDecks();
 
     // Topics, worst first. Clicking one narrows the cards below to it.
     const topics = topicStats(items, since, range.days ? 10 : 3);
     if (topics.length) {
-      el.createEl("h4", { text: "By topic" });
+      el.createEl("h4", { text: "По темам" });
       const table = el.createEl("table", { cls: "fc-weak-topics" });
       const hr = table.createEl("tr");
-      for (const h of ["Topic", "Answers", "Missed", "Miss rate"]) hr.createEl("th", { text: h });
+      for (const h of ["Topic", "Ответы", "Missed", "Доля промахов"]) hr.createEl("th", { text: h });
       for (const t of topics.slice(0, 15)) {
         const tr = table.createEl("tr", { cls: this.topic === t.topic ? "is-active" : "" });
         const a = tr.createEl("td").createEl("a", { text: t.topic, href: "#" });
@@ -113,19 +113,19 @@ export class WeakView extends ItemView {
 
     let weak = weakCards(items, since, range.minMisses);
     if (this.topic) weak = weak.filter((w) => topicOf(w.item.ref) === this.topic);
-    const what = range.days ? `in the last ${range.days} days` : "today";
+    const what = range.days ? `за последние ${range.days} дней` : "today";
     el.createEl("h4", { text: `Cards missed ${range.minMisses}+ times ${what}${this.topic ? ` · ${this.topic}` : ""} (${weak.length})` });
     if (!weak.length) {
-      el.createDiv({ cls: "fc-muted", text: range.days ? "None." : "None today. Cards you miss twice or more in a day show up here." });
+      el.createDiv({ cls: "fc-muted", text: range.days ? "Пусто." : "На сегодня пусто. Карточки, которые вы пропускаете дважды и более за день, появляются здесь." });
       return;
     }
     const bar = el.createDiv({ cls: "fc-leech-actions" });
-    const again = bar.createEl("button", { text: `Go through these ${weak.length} again`, cls: "mod-cta" });
-    again.setAttr("aria-label", "A practice run: answers are not recorded, so it can't hurt their schedule");
+    const again = bar.createEl("button", { text: `Пройти эти ${weak.length} снова`, cls: "mod-cta" });
+    again.setAttr("aria-label", "Тренировочный прогон: ответы не записываются, поэтому расписание не пострадает");
     again.onclick = () => void this.practice(weak);
     for (const w of weak.slice(0, this.shown)) this.row(el, w, today);
     if (weak.length > this.shown) {
-      const more = el.createEl("button", { text: `Show ${Math.min(PAGE, weak.length - this.shown)} more` });
+      const more = el.createEl("button", { text: `Показать ещё ${Math.min(PAGE, weak.length - this.shown)}` });
       more.onclick = () => {
         this.shown += PAGE;
         this.render();
@@ -136,7 +136,7 @@ export class WeakView extends ItemView {
   /** A preview deck of exactly these cards: nothing is recorded, so resting cards can be looked at again. */
   private async practice(weak: WeakCard[]): Promise<void> {
     const { plugin } = this;
-    const name = "Weak spots";
+    const name = "Слабые места";
     const existing = plugin.settings.filteredDecks.find((d) => d.name === name);
     const cards = weak.map((w) => w.item.ref.key ?? w.item.ref.uid);
     const def: FilteredDeck = { id: existing?.id ?? `w-${Date.now().toString(36)}`, name, search: `rated:${Math.max(1, RANGES.find((r) => r.id === this.range)!.days)}:1`, limit: cards.length, order: "due", reschedule: false };
@@ -151,7 +151,7 @@ export class WeakView extends ItemView {
     const resting = !!plugin.settings.restAfterMisses && !!state && missesSince(state, today) >= plugin.settings.restAfterMisses;
     box.createDiv({
       cls: "fc-leech-meta fc-muted",
-      text: [topicOf(ref), `missed ${w.misses} of ${w.answers}`, resting ? "resting until tomorrow" : "", state?.suspended ? "suspended" : ""].filter(Boolean).join(" · "),
+      text: [topicOf(ref), `промахов: ${w.misses} из ${w.answers}`, resting ? "отдыхает до завтра" : "", state?.suspended ? "приостановлена" : ""].filter(Boolean).join(" · "),
     });
     // The fact with its answer filled in; pictures are left to the note (a long list of them is slow on a phone).
     const faces = cardFaces(ref.card, ref.slot, plugin.crownSplitFor(ref));
@@ -172,24 +172,24 @@ export class WeakView extends ItemView {
       b.onclick = () => void fn(b);
     };
     const related = plugin.relatedFor(ref)[0];
-    btn(related ? `Open note: ${related.basename}` : "Open note", "Read about it", () => {
+    btn(related ? `Открыть заметку: ${related.basename}` : "Открыть заметку", "Прочитать об этом", () => {
       const file = related ?? this.app.vault.getFileByPath(ref.path);
-      if (!file) return void new Notice("Note not found.");
+      if (!file) return void new Notice("Заметка не найдена.");
       void this.app.workspace.getLeaf("tab").openFile(file, related ? undefined : { eState: { line: ref.card.startLine } });
     }, true);
-    btn("Explain", "Why the answer is what it is, with a memory hook (AI, saved after the first time)", async (b) => {
+    btn("Объяснить", "Почему ответ именно такой, плюс мнемоническая подсказка (ИИ; сохраняется после первого раза)", async (b) => {
       b.disabled = true;
-      b.setText("Explaining…");
+      b.setText("Объясняем…");
       const out = await plugin.ai.explain(ref);
       b.disabled = false;
-      b.setText("Explain");
+      b.setText("Объяснить");
       if (out) showExplanation(out);
     });
-    btn("Rewrite", "Edit the card", () => new EditCardModal(this.app, plugin, ref, () => this.render()).open());
+    btn("Rewrite", "Изменить карточку", () => new EditCardModal(this.app, plugin, ref, () => this.render()).open());
     if (ref.card.type === "cloze" && !plugin.isCrowned(ref)) {
-      btn("🦴 Reveal one by one", "Reveal the answers one at a time", async () => {
+      btn("🦴 Открывать по одному", "Открывать ответы по одному", async () => {
         await plugin.setCrowns([ref], true);
-        new Notice("Its answers now reveal one by one.");
+        new Notice("Её ответы теперь открываются по одному.");
       });
     }
   }

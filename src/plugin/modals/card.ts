@@ -20,16 +20,16 @@ export class EditCardModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Edit card");
+    this.setTitle("Изменить карточку");
     const { contentEl } = this;
-    contentEl.createDiv({ cls: "setting-item-description", text: `${this.ref.path}, line ${this.ref.card.startLine + 1}` });
+    contentEl.createDiv({ cls: "setting-item-description", text: `${this.ref.path}, строка ${this.ref.card.startLine + 1}` });
     const ta = contentEl.createEl("textarea", { cls: "fc-edit-area" });
     ta.value = this.ref.card.sourceLines.join("\n");
     ta.rows = Math.min(16, Math.max(4, this.ref.card.sourceLines.length + 2));
     const save = async () => {
       const ok = await this.plugin.editCard(this.ref, ta.value);
       if (!ok) {
-        new Notice("The note changed since this card was shown; reopen the card and try again.");
+        new Notice("Заметка изменилась с момента показа карточки; переоткройте карточку и попробуйте снова.");
         return;
       }
       this.close();
@@ -42,9 +42,9 @@ export class EditCardModal extends Modal {
       }
     });
     new Setting(contentEl)
-      .setDesc("⌘/Ctrl+Enter to save. Keep the ^fc-… tag at the end so the card keeps its history.")
-      .addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
-      .addButton((b) => b.setButtonText("Save").setCta().onClick(() => void save()));
+      .setDesc("⌘/Ctrl+Enter — сохранить. Оставьте тег ^fc-… в конце строки, чтобы карточка сохранила свою историю.")
+      .addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Сохранить").setCta().onClick(() => void save()));
     window.setTimeout(() => ta.focus(), 0);
   }
 
@@ -54,10 +54,10 @@ export class EditCardModal extends Modal {
 }
 
 const STATE_NAME: Record<number, string> = {
-  [State.New]: "New",
-  [State.Learning]: "Learning",
+  [State.New]: "Новые",
+  [State.Learning]: "Изучение",
   [State.Review]: "Review",
-  [State.Relearning]: "Relearning",
+  [State.Relearning]: "Доизучение",
 };
 
 function fmtDate(d: Date | string | undefined): string {
@@ -78,34 +78,34 @@ export class CardInfoModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Card info");
+    this.setTitle("Информация о карточке");
     const { contentEl } = this;
     const s = this.state;
     const c = s?.card;
     const now = new Date();
     const rows: Array<[string, string]> = [
-      ["Deck", this.ref.deck.split("/").join(" › ")],
-      ["Note", `${this.ref.path}, line ${this.ref.card.startLine + 1}`],
-      ["Card", this.ref.key ?? "new (no ID yet)"],
-      ["State", c ? STATE_NAME[c.state] : "New"],
-      ["First review", fmtDate(s?.reviews[0]?.ts)],
-      ["Latest review", fmtDate(s?.reviews[s.reviews.length - 1]?.ts)],
-      ["Due", c && c.state !== State.New ? fmtDate(c.due) : "—"],
-      ["Interval", c && c.state !== State.New ? formatInterval(c.due.getTime() - (c.last_review?.getTime() ?? now.getTime())) : "—"],
-      ["Stability", c && c.state !== State.New ? `${c.stability.toFixed(1)} days` : "—"],
+      ["Колода", this.ref.deck.split("/").join(" › ")],
+      ["Note", `${this.ref.path}, строка ${this.ref.card.startLine + 1}`],
+      ["Card", this.ref.key ?? "новая (ID ещё нет)"],
+      ["State", c ? STATE_NAME[c.state] : "Новые"],
+      ["Первое повторение", fmtDate(s?.reviews[0]?.ts)],
+      ["Последнее повторение", fmtDate(s?.reviews[s.reviews.length - 1]?.ts)],
+      ["К сроку", c && c.state !== State.New ? fmtDate(c.due) : "—"],
+      ["Интервал", c && c.state !== State.New ? formatInterval(c.due.getTime() - (c.last_review?.getTime() ?? now.getTime())) : "—"],
+      ["Stability", c && c.state !== State.New ? `${c.stability.toFixed(1)} дней` : "—"],
       ["Difficulty", c && c.state !== State.New ? `${((c.difficulty / 10) * 100).toFixed(0)}%` : "—"],
       [
         "Retrievability",
         c && c.state !== State.New ? `${(this.plugin.schedulerFor(this.ref).get_retrievability(c, now, false) * 100).toFixed(0)}%` : "—",
       ],
-      ["Reviews", String(s?.reviews.length ?? 0)],
+      ["Повторения", String(s?.reviews.length ?? 0)],
       ["Lapses", String(c?.lapses ?? 0)],
       [
-        "Average time",
+        "Среднее время",
         s?.reviews.length ? `${(s.reviews.reduce((a, r) => a + r.ms, 0) / s.reviews.length / 1000).toFixed(1)}s` : "—",
       ],
     ];
-    if (s?.suspended) rows.push(["Suspended", "yes"]);
+    if (s?.suspended) rows.push(["Приостановлены", "yes"]);
     const table = contentEl.createEl("table", { cls: "fc-info-table" });
     for (const [k, v] of rows) {
       const tr = table.createEl("tr");
@@ -113,14 +113,14 @@ export class CardInfoModal extends Modal {
       tr.createEl("td", { text: v });
     }
     if (s?.reviews.length) {
-      contentEl.createEl("h4", { text: "History" });
+      contentEl.createEl("h4", { text: "История" });
       const h = contentEl.createEl("table", { cls: "fc-info-history" });
       const head = h.createEl("tr");
-      for (const col of ["Date", "Type", "Rating", "Interval", "Time", "Device"]) head.createEl("th", { text: col });
+      for (const col of ["Date", "Type", "Rating", "Интервал", "Время", "Device"]) head.createEl("th", { text: col });
       for (const r of [...s.reviews].reverse()) {
         const tr = h.createEl("tr");
         tr.createEl("td", { text: fmtDate(r.ts) });
-        tr.createEl("td", { text: STATE_NAME[r.stateBefore] === "New" ? "Learn" : STATE_NAME[r.stateBefore] });
+        tr.createEl("td", { text: STATE_NAME[r.stateBefore] === "Новые" ? "Изучение" : STATE_NAME[r.stateBefore] });
         tr.createEl("td", { text: r.rating[0].toUpperCase() + r.rating.slice(1), cls: `fc-${r.rating}` });
         tr.createEl("td", { text: formatInterval(r.due.getTime() - Date.parse(r.ts)) });
         tr.createEl("td", { text: `${(r.ms / 1000).toFixed(1)}s` });
@@ -146,13 +146,13 @@ export class SetDueModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle(this.refs.length === 1 ? "Set due date" : `Set due date (${this.refs.length} cards)`);
+    this.setTitle(this.refs.length === 1 ? "Задать срок" : `Задать срок (${this.refs.length} карточек)`);
     const { contentEl } = this;
     let value = "";
     const apply = async () => {
       const now = Date.now();
       if (!parseDueInput(value, now, this.plugin.settings.dayStartHour)) {
-        new Notice("Enter 0 (today), a number of days, or a range like 3-7.");
+        new Notice("Введите 0 (сегодня), число дней или диапазон вида 3-7.");
         return;
       }
       const events: LogEvent[] = [];
@@ -168,8 +168,8 @@ export class SetDueModal extends Modal {
       this.onDone();
     };
     new Setting(contentEl)
-      .setName("Show in how many days?")
-      .setDesc("0 = today, 1 = tomorrow, 3-7 = a random day in that range.")
+      .setName("Через сколько дней показать?")
+      .setDesc("0 = сегодня, 1 = завтра, 3–7 = случайный день в этом диапазоне.")
       .addText((t) => {
         t.setPlaceholder("0").onChange((v) => (value = v));
         t.inputEl.addEventListener("keydown", (e) => {

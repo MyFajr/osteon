@@ -27,34 +27,34 @@ import {
   type ReviewRow,
 } from "../../core/stats";
 import { barChart, donut, type Bar } from "../charts";
-import { dateLabel, heatmapData, renderHeatmap } from "../heatmap";
+import { dateLabel, heatmapData, plural, renderHeatmap } from "../heatmap";
 
 export const VIEW_STATS = "flashcards-stats";
 
 type Range = "month" | "3months" | "year" | "all";
 const RANGES: [Range, string][] = [
-  ["month", "1 month"],
-  ["3months", "3 months"],
-  ["year", "1 year"],
-  ["all", "Deck life"],
+  ["month", "1 месяц"],
+  ["3months", "3 месяца"],
+  ["year", "1 год"],
+  ["all", "За всё время"],
 ];
 const RANGE_DAYS: Record<Exclude<Range, "all">, number> = { month: 30, "3months": 90, year: 365 };
 
 const KINDS: [ReviewKind, string][] = [
-  ["learn", "Learning"],
-  ["relearn", "Relearning"],
-  ["young", "Young"],
-  ["mature", "Mature"],
+  ["learn", "Изучение"],
+  ["relearn", "Доизучение"],
+  ["young", "Молодые"],
+  ["mature", "Зрелые"],
 ];
 
-const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
 const pct = (a: number, b: number) => (b ? `${((a / b) * 100).toFixed(1)}%` : "—");
 const mins = (ms: number) => ms / 60000;
 
 function shortDate(day: number, today: number): string {
   const diff = day - today;
-  if (Math.abs(diff) < 60) return `${diff}d`;
-  return dateLabel(day).split(" ").slice(1, 3).join(" ").replace(",", "");
+  if (Math.abs(diff) < 60) return `${diff} дн.`;
+  const m = dateLabel(day).match(/\d+ [а-я]+/);
+  return m ? m[0] : dateLabel(day);
 }
 
 export class StatsView extends ItemView {
@@ -77,7 +77,7 @@ export class StatsView extends ItemView {
   }
 
   getDisplayText(): string {
-    return this.deck ? `Statistics: ${this.deck}` : "Statistics";
+    return this.deck ? `Statistics: ${this.deck}` : "Статистика";
   }
 
   getIcon(): string {
@@ -114,7 +114,7 @@ export class StatsView extends ItemView {
     el.empty();
     el.addClass("fc-stats");
     if (!this.plugin.ready) {
-      el.createDiv({ cls: "fc-muted", text: "Loading cards…" });
+      el.createDiv({ cls: "fc-muted", text: "Загрузка карточек…" });
       return;
     }
     const startHour = this.plugin.settings.dayStartHour;
@@ -127,7 +127,7 @@ export class StatsView extends ItemView {
     this.header(el);
     this.today(el, rows, today);
     this.futureDue(el, items, today);
-    this.section(el, "Calendar", (body) => renderHeatmap(body, this.plugin, this.deck, data, this.yearState, () => this.render()));
+    this.section(el, "Календарь", (body) => renderHeatmap(body, this.plugin, this.deck, data, this.yearState, () => this.render()));
     this.reviews(el, rows, today, firstDay);
     this.counts(el, items, now);
     this.intervals(el, items, today);
@@ -141,9 +141,9 @@ export class StatsView extends ItemView {
 
   private header(el: HTMLElement): void {
     const bar = el.createDiv({ cls: "fc-stats-header" });
-    bar.createSpan({ text: "Deck: " });
+    bar.createSpan({ text: "Колода: " });
     const select = bar.createEl("select", { cls: "dropdown" });
-    select.createEl("option", { text: "All decks (collection)", value: "" });
+    select.createEl("option", { text: "Все колоды (коллекция)", value: "" });
     const decks = new Set<string>();
     for (const ref of this.plugin.index.refs()) {
       const parts = ref.deck.split("/");
@@ -200,20 +200,20 @@ export class StatsView extends ItemView {
   // Today ---------------------------------------------------------------------------------------
 
   private today(el: HTMLElement, rows: ReviewRow[], today: number): void {
-    this.section(el, "Today", (body) => {
+    this.section(el, "Сегодня", (body) => {
       const t = todaySummary(rows, today);
       if (!t.cards) {
-        body.createDiv({ cls: "fc-muted", text: "No cards have been studied today." });
+        body.createDiv({ cls: "fc-muted", text: "Сегодня вы ещё не занимались." });
         return;
       }
       const m = mins(t.ms);
-      body.createDiv({ text: `Studied ${plural(t.cards, "card")} in ${m.toFixed(2)} minutes today (${(t.ms / 1000 / t.cards).toFixed(2)}s/card)` });
-      body.createDiv({ text: `Again count: ${t.again} (${pct(t.cards - t.again, t.cards)} correct)` });
-      body.createDiv({ text: `Learn: ${t.learn}, Review: ${t.review}, Relearn: ${t.relearn}, Filtered: 0` });
+      body.createDiv({ text: `Сегодня изучено ${plural(t.cards, "card")} за ${m.toFixed(2)} мин (${(t.ms / 1000 / t.cards).toFixed(2)} с/карточку)` });
+      body.createDiv({ text: `Ответов «Снова»: ${t.again} (${pct(t.cards - t.again, t.cards)} верных)` });
+      body.createDiv({ text: `Изучение: ${t.learn}, Повторение: ${t.review}, Доизучение: ${t.relearn}, Фильтровальная: 0` });
       body.createDiv({
         text: t.matureTotal
-          ? `Correct answers on mature cards: ${t.matureCorrect}/${t.matureTotal} (${pct(t.matureCorrect, t.matureTotal)})`
-          : "No mature cards were studied today.",
+          ? `Верных ответов на зрелых карточках: ${t.matureCorrect}/${t.matureTotal} (${pct(t.matureCorrect, t.matureTotal)})`
+          : "Сегодня зрелые карточки не повторялись.",
       });
     });
   }
@@ -221,12 +221,12 @@ export class StatsView extends ItemView {
   // Future due ----------------------------------------------------------------------------------
 
   private futureDue(el: HTMLElement, items: QueueItem[], today: number): void {
-    this.section(el, "Future Due", (body, controls) => {
+    this.section(el, "Будущие сроки", (body, controls) => {
       this.rangeRadios(controls, "future", "month", [
-        ["month", "1 month"],
-        ["3months", "3 months"],
-        ["year", "1 year"],
-        ["all", "All"],
+        ["month", "1 месяц"],
+        ["3months", "3 месяца"],
+        ["year", "1 год"],
+        ["all", "Все"],
       ]);
       const l = controls.createEl("label", { cls: "fc-radio" });
       const cb = l.createEl("input", { type: "checkbox" });
@@ -235,7 +235,7 @@ export class StatsView extends ItemView {
         this.futureBacklog = cb.checked;
         this.render();
       };
-      l.appendText("Backlog");
+      l.appendText("Задолженность");
 
       const due = forecast(items, today, this.plugin.settings.dayStartHour, this.futureBacklog);
       const r = this.range("future");
@@ -251,18 +251,18 @@ export class StatsView extends ItemView {
         cum += n;
         cumulative.push(cum);
         bars.push({
-          label: d === today ? "Today" : shortDate(d, today),
-          title: d === today ? "Today" : `In ${plural(d - today, "day")} (${dateLabel(d)})`,
-          segments: [{ value: n, cls: "fc-c-due", label: "Due" }],
+          label: d === today ? "Сегодня" : shortDate(d, today),
+          title: d === today ? "Сегодня" : `Через ${plural(d - today, "дн.")} (${dateLabel(d)})`,
+          segments: [{ value: n, cls: "fc-c-due", label: "К сроку" }],
           onClick: n ? this.browse(`prop:due=${d - today}`) : undefined,
         });
       }
-      barChart(body, { bars, line: { values: cumulative, label: "Running total", format: (v) => String(Math.round(v)) } });
+      barChart(body, { bars, line: { values: cumulative, label: "Нарастающим итогом", format: (v) => String(Math.round(v)) } });
       const total = values.reduce((a, b) => a + b, 0);
       this.summary(body, [
-        ["Total:", plural(total, "review")],
-        ["Average:", `${(total / Math.max(1, values.length)).toFixed(1)} reviews/day`],
-        ["Due tomorrow:", plural(due.get(today + 1) ?? 0, "review")],
+        ["Всего:", plural(total, "review")],
+        ["Среднее:", `${(total / Math.max(1, values.length)).toFixed(1)} повт./день`],
+        ["На завтра:", plural(due.get(today + 1) ?? 0, "review")],
       ]);
     });
   }
@@ -270,10 +270,10 @@ export class StatsView extends ItemView {
   // Reviews -------------------------------------------------------------------------------------
 
   private reviews(el: HTMLElement, rows: ReviewRow[], today: number, firstDay: number): void {
-    this.section(el, "Reviews", (body, controls) => {
+    this.section(el, "Повторения", (body, controls) => {
       for (const [v, label] of [
-        [false, "Count"],
-        [true, "Time"],
+        [false, "Количество"],
+        [true, "Время"],
       ] as const) {
         const l = controls.createEl("label", { cls: "fc-radio" });
         const input = l.createEl("input", { type: "radio" });
@@ -304,17 +304,17 @@ export class StatsView extends ItemView {
         };
       });
       const unit = time ? (v: number) => `${v.toFixed(v < 10 ? 1 : 0)}m` : (v: number) => String(Math.round(v));
-      barChart(body, { bars, format: unit, line: { values: cumulative, label: "Running total", format: unit } });
+      barChart(body, { bars, format: unit, line: { values: cumulative, label: "Нарастающим итогом", format: unit } });
       this.legend(body, KINDS.map(([k, l]) => [`fc-c-${k}`, l]));
       const per = days.map((d) => KINDS.reduce((a, [k]) => a + val(d, k), 0));
       const p = periodSummary(per);
-      const u = time ? "minutes" : "reviews";
+      const u = time ? "мин" : "повт.";
       const f = (v: number) => (time ? v.toFixed(1) : String(Math.round(v)));
       this.summary(body, [
-        ["Days studied:", `${p.daysStudied} of ${p.daysTotal} (${pct(p.daysStudied, p.daysTotal)})`],
-        ["Total:", `${f(p.total)} ${u}`],
-        ["Average for days studied:", `${f(p.avgStudied)} ${u}/day`],
-        ["Average over period:", `${f(p.avgOverall)} ${u}/day`],
+        ["Дней занятий:", `${p.daysStudied} of ${p.daysTotal} (${pct(p.daysStudied, p.daysTotal)})`],
+        ["Всего:", `${f(p.total)} ${u}`],
+        ["Среднее за дни занятий:", `${f(p.avgStudied)} ${u}/день`],
+        ["Среднее за период:", `${f(p.avgOverall)} ${u}/день`],
       ]);
     });
   }
@@ -331,16 +331,16 @@ export class StatsView extends ItemView {
   // Card counts ---------------------------------------------------------------------------------
 
   private counts(el: HTMLElement, items: QueueItem[], now: number): void {
-    this.section(el, "Card Counts", (body) => {
+    this.section(el, "Количество карточек", (body) => {
       const c = cardCounts(items, now);
       donut(body, [
-        { label: "New", value: c.new, cls: "fc-c-new" },
-        { label: "Learning", value: c.learning, cls: "fc-c-learn" },
-        { label: "Relearning", value: c.relearning, cls: "fc-c-relearn" },
-        { label: "Young", value: c.young, cls: "fc-c-young" },
-        { label: "Mature", value: c.mature, cls: "fc-c-mature" },
-        { label: "Suspended", value: c.suspended, cls: "fc-c-suspended" },
-        { label: "Buried", value: c.buried, cls: "fc-c-buried" },
+        { label: "Новые", value: c.new, cls: "fc-c-new" },
+        { label: "Изучение", value: c.learning, cls: "fc-c-learn" },
+        { label: "Доизучение", value: c.relearning, cls: "fc-c-relearn" },
+        { label: "Молодые", value: c.young, cls: "fc-c-young" },
+        { label: "Зрелые", value: c.mature, cls: "fc-c-mature" },
+        { label: "Приостановлены", value: c.suspended, cls: "fc-c-suspended" },
+        { label: "Отложено", value: c.buried, cls: "fc-c-buried" },
       ]);
     });
   }
@@ -348,12 +348,12 @@ export class StatsView extends ItemView {
   // Intervals, stability, difficulty, retrievability --------------------------------------------
 
   private intervals(el: HTMLElement, items: QueueItem[], today: number): void {
-    this.section(el, "Review Intervals", (body, controls) => {
+    this.section(el, "Интервалы повторений", (body, controls) => {
       for (const [v, label] of [
-        ["month", "1 month"],
+        ["month", "1 месяц"],
         ["p50", "50%"],
         ["p95", "95%"],
-        ["all", "All"],
+        ["all", "Все"],
       ] as const) {
         const l = controls.createEl("label", { cls: "fc-radio" });
         const input = l.createEl("input", { type: "radio" });
@@ -367,7 +367,7 @@ export class StatsView extends ItemView {
       }
       const ivls = reviewCards(items).map((s) => s.card.scheduled_days);
       if (!ivls.length) {
-        body.createDiv({ cls: "fc-muted", text: "No cards have reached review yet." });
+        body.createDiv({ cls: "fc-muted", text: "До повторений карточки ещё не дошли." });
         return;
       }
       const max =
@@ -375,11 +375,11 @@ export class StatsView extends ItemView {
         : this.ivlRange === "p50" ? percentile(ivls, 0.5)
         : this.ivlRange === "p95" ? percentile(ivls, 0.95)
         : Math.max(...ivls);
-      this.dayHistogram(body, ivls, Math.max(1, max), "Interval", (a, b) => `prop:ivl>=${a} prop:ivl<=${b}`);
+      this.dayHistogram(body, ivls, Math.max(1, max), "Интервал", (a, b) => `prop:ivl>=${a} prop:ivl<=${b}`);
       const avg = ivls.reduce((a, b) => a + b, 0) / ivls.length;
       this.summary(body, [
-        ["Average interval:", formatInterval(avg * 86400000)],
-        ["Longest interval:", formatInterval(Math.max(...ivls) * 86400000)],
+        ["Средний интервал:", formatInterval(avg * 86400000)],
+        ["Самый долгий интервал:", formatInterval(Math.max(...ivls) * 86400000)],
       ]);
     });
   }
@@ -396,55 +396,55 @@ export class StatsView extends ItemView {
       cumulative.push((cum / total) * 100);
       const a = Math.ceil(b.from);
       const z = Math.max(a, Math.ceil(b.to) - 1);
-      const title = a === z ? `${what}: ${plural(a, "day")}` : `${what}: ${a}–${z} days`;
+      const title = a === z ? `${what}: ${plural(a, "дней")}` : `${what}: ${a}–${z} дн.`;
       return {
         label: `${a}d`,
         title,
-        segments: [{ value: b.count, cls: "fc-c-ivl", label: "Cards" }],
+        segments: [{ value: b.count, cls: "fc-c-ivl", label: "Карточки" }],
         onClick: b.count && search ? this.browse(search(a, z)) : undefined,
       };
     });
-    barChart(body, { bars, line: { values: cumulative, label: "Cumulative", format: (v) => `${Math.round(v)}%`, max: 100 } });
+    barChart(body, { bars, line: { values: cumulative, label: "Нарастающим итогом", format: (v) => `${Math.round(v)}%`, max: 100 } });
   }
 
   private fsrsGraphs(el: HTMLElement, items: QueueItem[], now: number): void {
     const withState = items.filter((i) => i.state && !i.state.suspended && (i.state.card.state === State.Review || i.state.card.state === State.Relearning));
-    this.section(el, "Card Stability", (body) => {
+    this.section(el, "Стабильность карточек", (body) => {
       const s = withState.map((i) => i.state!.card.stability);
-      if (!s.length) return void body.createDiv({ cls: "fc-muted", text: "No cards have reached review yet." });
+      if (!s.length) return void body.createDiv({ cls: "fc-muted", text: "До повторений карточки ещё не дошли." });
       this.dayHistogram(body, s, Math.max(1, percentile(s, 0.95)), "Stability", (a, b) => `prop:s>=${a} prop:s<=${b + 1}`);
-      this.summary(body, [["Average stability:", formatInterval((s.reduce((a, b) => a + b, 0) / s.length) * 86400000)]]);
+      this.summary(body, [["Средняя стабильность:", formatInterval((s.reduce((a, b) => a + b, 0) / s.length) * 86400000)]]);
     });
-    this.section(el, "Card Difficulty", (body) => {
+    this.section(el, "Сложность карточек", (body) => {
       const d = withState.map((i) => difficultyPct(i.state!.card.difficulty));
-      if (!d.length) return void body.createDiv({ cls: "fc-muted", text: "No cards have reached review yet." });
+      if (!d.length) return void body.createDiv({ cls: "fc-muted", text: "До повторений карточки ещё не дошли." });
       const bins = histogram(d, 0, 100, 20);
       barChart(body, {
         bars: bins.map((b, i) => ({
           label: `${Math.round(b.from)}%`,
-          title: `Difficulty ${Math.round(b.from)}–${Math.round(b.to)}%`,
-          segments: [{ value: b.count, cls: `fc-c-diff fc-grad-${Math.floor(i / 2)}`, label: "Cards" }],
+          title: `Сложность ${Math.round(b.from)}–${Math.round(b.to)}%`,
+          segments: [{ value: b.count, cls: `fc-c-diff fc-grad-${Math.floor(i / 2)}`, label: "Карточки" }],
         })),
         xTicks: 10,
       });
-      this.summary(body, [["Average difficulty:", `${(d.reduce((a, b) => a + b, 0) / d.length).toFixed(0)}%`]]);
+      this.summary(body, [["Средняя сложность:", `${(d.reduce((a, b) => a + b, 0) / d.length).toFixed(0)}%`]]);
     });
-    this.section(el, "Card Retrievability", (body) => {
+    this.section(el, "Извлекаемость карточек", (body) => {
       const r = withState.map((i) => this.plugin.schedulerFor(i.ref).get_retrievability(i.state!.card, new Date(now), false) * 100);
-      if (!r.length) return void body.createDiv({ cls: "fc-muted", text: "No cards have reached review yet." });
+      if (!r.length) return void body.createDiv({ cls: "fc-muted", text: "До повторений карточки ещё не дошли." });
       const bins = histogram(r, 0, 100, 20);
       barChart(body, {
         bars: bins.map((b, i) => ({
           label: `${Math.round(b.from)}%`,
-          title: `Retrievability ${Math.round(b.from)}–${Math.round(b.to)}%`,
-          segments: [{ value: b.count, cls: `fc-c-retr fc-grad-${9 - Math.floor(i / 2)}`, label: "Cards" }],
+          title: `Извлекаемость ${Math.round(b.from)}–${Math.round(b.to)}%`,
+          segments: [{ value: b.count, cls: `fc-c-retr fc-grad-${9 - Math.floor(i / 2)}`, label: "Карточки" }],
         })),
         xTicks: 10,
       });
       const sum = r.reduce((a, b) => a + b, 0);
       this.summary(body, [
-        ["Average retrievability:", `${(sum / r.length).toFixed(0)}%`],
-        ["Estimated total knowledge:", plural(Math.round(sum / 100), "card")],
+        ["Средняя извлекаемость:", `${(sum / r.length).toFixed(0)}%`],
+        ["Приблизительный объём знаний:", plural(Math.round(sum / 100), "card")],
       ]);
     });
   }
@@ -452,7 +452,7 @@ export class StatsView extends ItemView {
   // Hourly, buttons -----------------------------------------------------------------------------
 
   private hourlyGraph(el: HTMLElement, rows: ReviewRow[], today: number, firstDay: number): void {
-    this.section(el, "Hourly Breakdown", (body, controls) => {
+    this.section(el, "Разбивка по часам", (body, controls) => {
       this.rangeRadios(controls, "hourly");
       const h = hourly(rows, this.rangeFrom("hourly", today, firstDay));
       const start = this.plugin.settings.dayStartHour;
@@ -461,29 +461,29 @@ export class StatsView extends ItemView {
         bars: order.map((hr) => ({
           label: `${hr}`,
           title: `${hr}:00–${hr + 1}:00`,
-          segments: [{ value: h[hr].total, cls: "fc-c-hour", label: "Reviews" }],
+          segments: [{ value: h[hr].total, cls: "fc-c-hour", label: "Повторения" }],
         })),
-        line: { values: order.map((hr) => (h[hr].total ? (h[hr].correct / h[hr].total) * 100 : 0)), label: "Correct", format: (v) => `${Math.round(v)}%`, max: 100 },
+        line: { values: order.map((hr) => (h[hr].total ? (h[hr].correct / h[hr].total) * 100 : 0)), label: "Верно", format: (v) => `${Math.round(v)}%`, max: 100 },
         xTicks: 12,
       });
     });
   }
 
   private buttons(el: HTMLElement, rows: ReviewRow[], today: number, firstDay: number): void {
-    this.section(el, "Answer Buttons", (body, controls) => {
+    this.section(el, "Кнопки ответов", (body, controls) => {
       this.rangeRadios(controls, "buttons");
       const b = answerButtons(rows, this.rangeFrom("buttons", today, firstDay));
       const groups = [
-        ["learning", "Learning", "fc-c-learn"],
-        ["young", "Young", "fc-c-young"],
-        ["mature", "Mature", "fc-c-mature"],
+        ["learning", "Изучение", "fc-c-learn"],
+        ["young", "Молодые", "fc-c-young"],
+        ["mature", "Зрелые", "fc-c-mature"],
       ] as const;
-      const names = ["Again", "Hard", "Good", "Easy"];
+      const names = ["Снова", "Трудно", "Хорошо", "Легко"];
       const bars: Bar[] = [];
       for (const [g, label, cls] of groups) {
         const total = b[g].reduce((a, v) => a + v, 0);
         b[g].forEach((n, i) =>
-          bars.push({ label: `${i + 1}`, title: `${label}: ${names[i]} (${pct(n, total)})`, segments: [{ value: n, cls, label: "Answers" }] }),
+          bars.push({ label: `${i + 1}`, title: `${label}: ${names[i]} (${pct(n, total)})`, segments: [{ value: n, cls, label: "Ответы" }] }),
         );
       }
       barChart(body, { bars, xTicks: 12 });
@@ -492,7 +492,7 @@ export class StatsView extends ItemView {
         body,
         groups.map(([g, label]) => {
           const total = b[g].reduce((a, v) => a + v, 0);
-          return [`${label}:`, `Correct: ${pct(total - b[g][0], total)} (${total - b[g][0]} of ${total})`];
+          return [`${label}:`, `Верно: ${pct(total - b[g][0], total)} (${total - b[g][0]} из ${total})`];
         }),
       );
     });
@@ -501,7 +501,7 @@ export class StatsView extends ItemView {
   // Added ---------------------------------------------------------------------------------------
 
   private added(el: HTMLElement, items: QueueItem[], today: number, startHour: number): void {
-    this.section(el, "Added", (body, controls) => {
+    this.section(el, "Добавлено", (body, controls) => {
       this.rangeRadios(controls, "added");
       // Cards live in notes, so a card's "added" date is its note's creation date.
       const ctime = new Map<string, number>();
@@ -523,13 +523,13 @@ export class StatsView extends ItemView {
       for (let d = from; d <= today; d++) {
         const n = counts.get(d) ?? 0;
         values.push(n);
-        bars.push({ label: shortDate(d, today), title: dateLabel(d), segments: [{ value: n, cls: "fc-c-added", label: "Added" }] });
+        bars.push({ label: shortDate(d, today), title: dateLabel(d), segments: [{ value: n, cls: "fc-c-added", label: "Добавлено" }] });
       }
       barChart(body, { bars });
       const p = periodSummary(values);
       this.summary(body, [
-        ["Total:", plural(p.total, "card")],
-        ["Average:", `${p.avgOverall.toFixed(1)} cards/day`],
+        ["Всего:", plural(p.total, "card")],
+        ["Среднее:", `${p.avgOverall.toFixed(1)} карт./день`],
       ]);
     });
   }
@@ -537,14 +537,14 @@ export class StatsView extends ItemView {
   // True retention ------------------------------------------------------------------------------
 
   private retention(el: HTMLElement, rows: ReviewRow[], today: number): void {
-    this.section(el, "True Retention", (body) => {
+    this.section(el, "Истинное удержание", (body) => {
       const t = body.createEl("table", { cls: "fc-retention" });
       const h1 = t.createEl("tr");
       h1.createEl("th");
-      for (const g of ["Young", "Mature", "Total"]) h1.createEl("th", { text: g, attr: { colspan: "3" } });
+      for (const g of ["Молодые", "Зрелые", "Всего"]) h1.createEl("th", { text: g, attr: { colspan: "3" } });
       const h2 = t.createEl("tr");
       h2.createEl("th");
-      for (let i = 0; i < 3; i++) for (const c of ["Pass", "Fail", "Retention"]) h2.createEl("th", { text: c, cls: "fc-num" });
+      for (let i = 0; i < 3; i++) for (const c of ["Верно", "Неверно", "Удержание"]) h2.createEl("th", { text: c, cls: "fc-num" });
       for (const r of trueRetention(rows, today)) {
         const tr = t.createEl("tr");
         tr.createEl("th", { text: r.label });
@@ -555,7 +555,7 @@ export class StatsView extends ItemView {
           tr.createEl("td", { text: g.pass + g.fail ? pct(g.pass, g.pass + g.fail) : "N/A", cls: "fc-num" });
         }
       }
-      body.createDiv({ cls: "fc-muted fc-small", text: "Pass = Hard, Good or Easy on a review card. Learning cards aren't counted." });
+      body.createDiv({ cls: "fc-muted fc-small", text: "Успех — «Трудно», «Хорошо» или «Легко» на карточке повторения. Карточки в изучении не считаются." });
     });
   }
 }

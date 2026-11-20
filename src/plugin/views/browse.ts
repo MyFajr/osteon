@@ -53,7 +53,7 @@ export class BrowseView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Browse cards";
+    return "Обзор карточек";
   }
 
   getIcon(): string {
@@ -67,7 +67,7 @@ export class BrowseView extends ItemView {
     const bar = el.createDiv({ cls: "fc-browse-bar" });
     const input = bar.createEl("input", {
       type: "search",
-      placeholder: "Search: deck:Ortho tag:high-yield is:due is:onebyone flag:1 prop:ivl>30 -is:new text…",
+      placeholder: "Поиск: deck:Ortho tag:high-yield is:due is:onebyone flag:1 prop:ivl>30 -is:new текст…",
       cls: "fc-browse-search",
     });
     input.value = this.query;
@@ -119,7 +119,7 @@ export class BrowseView extends ItemView {
     const uids = new Set(this.results.map((r) => r.ref.uid));
     for (const u of [...this.selected]) if (!uids.has(u)) this.selected.delete(u);
     this.countEl.setText(
-      `${this.results.length} card${this.results.length === 1 ? "" : "s"}${this.results.length > MAX_ROWS ? ` (showing first ${MAX_ROWS})` : ""}`,
+      `${this.results.length} карточек${this.results.length > MAX_ROWS ? ` (показаны первые ${MAX_ROWS})` : ""}`,
     );
     this.renderList();
     this.renderBulk();
@@ -141,7 +141,7 @@ export class BrowseView extends ItemView {
       this.renderList();
       this.renderBulk();
     };
-    for (const col of ["Card", "Deck", "Due", "Interval", "Difficulty", "Lapses"]) head.createEl("th", { text: col });
+    for (const col of ["Card", "Колода", "К сроку", "Интервал", "Difficulty", "Lapses"]) head.createEl("th", { text: col });
     const body = table.createEl("tbody");
     const now = Date.now();
     for (const item of this.results.slice(0, MAX_ROWS)) {
@@ -169,7 +169,7 @@ export class BrowseView extends ItemView {
       tr.createEl("td", { text: plain(faces.question).slice(0, 120), cls: "fc-browse-front" });
       tr.createEl("td", { text: ref.deck.split("/").pop() ?? "", cls: "fc-muted" });
       tr.createEl("td", {
-        text: isNew ? "New" : state?.suspended ? "Suspended" : c.due.getTime() <= now ? "Due" : formatInterval(c.due.getTime() - now),
+        text: isNew ? "Новые" : state?.suspended ? "Приостановлены" : c.due.getTime() <= now ? "К сроку" : formatInterval(c.due.getTime() - now),
       });
       tr.createEl("td", { text: isNew ? "" : formatInterval(c.scheduled_days * 86400000 || c.due.getTime() - (c.last_review?.getTime() ?? now)) });
       tr.createEl("td", { text: isNew ? "" : `${Math.round(c.difficulty * 10)}%` });
@@ -196,26 +196,26 @@ export class BrowseView extends ItemView {
     btn("Suspend", () => void this.bulk(items, "suspend"));
     btn("Unsuspend", () => void this.bulk(items, "unsuspend"));
     btn("Reset", () => void this.bulk(items, "reset"));
-    btn("Set due date…", () => new SetDueModal(this.app, this.plugin, items.map((i) => i.ref), () => this.refresh()).open());
+    btn("Задать срок…", () => new SetDueModal(this.app, this.plugin, items.map((i) => i.ref), () => this.refresh()).open());
     btn("Flag…", () => {
       const menu = new Menu();
       FLAG_NAMES.forEach((name, n) =>
-        menu.addItem((i) => i.setTitle(n ? `${name} flag` : "Remove flag").onClick(() => void this.bulk(items, "flag", n))),
+        menu.addItem((i) => i.setTitle(n ? `${name} flag` : "Убрать флажок").onClick(() => void this.bulk(items, "flag", n))),
       );
       menu.showAtPosition({ x: el.getBoundingClientRect().left + 200, y: el.getBoundingClientRect().bottom });
     });
-    btn("🦴 One by one…", () => {
+    btn("🦴 По одному…", () => {
       const menu = new Menu();
       const set = (on: boolean | undefined, done: string) => async () => {
         const n = await this.plugin.setCrowns(items.map((i) => i.ref), on);
         new Notice(`${n} card${n === 1 ? "" : "s"} ${done}.`);
       };
-      menu.addItem((i) => i.setTitle("Reveal one by one").setIcon("bone").onClick(set(true, "switched to one by one")));
-      menu.addItem((i) => i.setTitle("Show all at once").onClick(set(false, "switched to all-at-once")));
-      menu.addItem((i) => i.setTitle("Automatic (lists on separate lines)").onClick(set(undefined, "back to automatic")));
+      menu.addItem((i) => i.setTitle("Открывать по одному").setIcon("bone").onClick(set(true, "переключено на показ по одному")));
+      menu.addItem((i) => i.setTitle("Показать все сразу").onClick(set(false, "переключено на показ всех сразу")));
+      menu.addItem((i) => i.setTitle("Автоматически (списки отдельными строками)").onClick(set(undefined, "возврат к автоматическому режиму")));
       menu.showAtPosition({ x: el.getBoundingClientRect().left + 200, y: el.getBoundingClientRect().bottom });
     });
-    btn("Clear selection", () => {
+    btn("Снять выделение", () => {
       this.selected.clear();
       this.renderList();
       this.renderBulk();
@@ -255,7 +255,7 @@ export class BrowseView extends ItemView {
     this.previewComponent?.unload();
     const item = this.results.find((r) => r.ref.uid === this.previewUid);
     if (!item) {
-      el.createDiv({ cls: "fc-muted", text: "Select a card to preview it." });
+      el.createDiv({ cls: "fc-muted", text: "Выберите карточку, чтобы увидеть её предпросмотр." });
       return;
     }
     this.previewComponent = new Component();
@@ -268,20 +268,20 @@ export class BrowseView extends ItemView {
       setIcon(b, icon);
       b.onclick = fn;
     };
-    act("file-text", "Open note", () => {
+    act("file-text", "Открыть заметку", () => {
       const file = this.app.vault.getFileByPath(ref.path);
       if (file) void this.app.workspace.getLeaf("tab").openFile(file, { eState: { line: ref.card.startLine } });
     });
-    act("info", "Card info", () => new CardInfoModal(this.app, this.plugin, ref, item.state).open());
+    act("info", "Информация о карточке", () => new CardInfoModal(this.app, this.plugin, ref, item.state).open());
     act(item.state?.suspended ? "play" : "pause", item.state?.suspended ? "Unsuspend" : "Suspend", () =>
       void this.bulk([item], item.state?.suspended ? "unsuspend" : "suspend"),
     );
-    act("calendar", "Set due date", () => new SetDueModal(this.app, this.plugin, [ref], () => this.refresh()).open());
+    act("calendar", "Задать срок", () => new SetDueModal(this.app, this.plugin, [ref], () => this.refresh()).open());
     if (ref.card.type === "cloze") {
       const on = this.plugin.isCrowned(ref);
       const b = actions.createEl("button", {
         cls: `clickable-icon fc-crown-toggle${on ? " is-active" : ""}`,
-        attr: { "aria-label": on ? "Answers reveal one by one. Click for all at once" : "Reveal this card's answers one by one" },
+        attr: { "aria-label": on ? "Ответы открываются по одному. Нажмите, чтобы показать все сразу" : "Открывать ответы этой карточки по одному" },
       });
       setIcon(b, "bone");
       b.onclick = () => void this.plugin.setCrowns([ref], !on);

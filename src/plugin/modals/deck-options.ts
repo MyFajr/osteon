@@ -40,19 +40,19 @@ export class DeckOptionsModal extends Modal {
     const seqs = sequencesFrom(histories, s.dayStartHour);
     const usable = seqs.reduce((n, q) => n + q.filter((x, k) => k > 0 && x.t > 0).length, 0);
     const row = new Setting(contentEl)
-      .setName("Optimize FSRS parameters")
+      .setName("Оптимизировать параметры FSRS")
       .setDesc(
         usable >= MIN_REVIEWS_TO_OPTIMIZE
-          ? `Fit the parameters to this preset's own history (${usable.toLocaleString()} spaced reviews from ${seqs.length.toLocaleString()} cards). Takes a few seconds.`
-          : `Needs at least ${MIN_REVIEWS_TO_OPTIMIZE} spaced reviews in this preset; it has ${usable.toLocaleString()}. Keep the defaults for now.`,
+          ? `Подобрать параметры по истории самого пресета (${usable.toLocaleString()} интервальных повторений по ${seqs.length.toLocaleString()} карточкам). Занимает несколько секунд.`
+          : `Нужно не меньше ${MIN_REVIEWS_TO_OPTIMIZE} интервальных повторений в этом пресете; сейчас ${usable.toLocaleString()}. Пока оставьте значения по умолчанию.`,
       );
     if (usable < MIN_REVIEWS_TO_OPTIMIZE) return;
     const out = contentEl.createDiv({ cls: "fc-muted fc-optimize-result" });
     row.addButton((b) =>
-      b.setButtonText("Optimize").onClick(async () => {
+      b.setButtonText("Оптимизировать").onClick(async () => {
         b.setDisabled(true);
         out.empty();
-        const notice = new Notice("Optimizing FSRS parameters… 0%", 0);
+        const notice = new Notice("Оптимизация параметров FSRS… 0%", 0);
         let lastYield = performance.now();
         try {
           const res = await optimize(seqs, p.scheduler.weights.length >= 21 ? p.scheduler.weights : undefined, {
@@ -60,7 +60,7 @@ export class DeckOptionsModal extends Modal {
             // timers are throttled to a second or more, which made per-iteration yields crawl.
             progress: (f) => {
               if (performance.now() - lastYield < 150) return;
-              notice.setMessage(`Optimizing FSRS parameters… ${Math.round(f * 100)}%`);
+              notice.setMessage(`Подбор параметров FSRS… ${Math.round(f * 100)}%`);
               return new Promise<void>((r) => window.setTimeout(() => ((lastYield = performance.now()), r()), 0));
             },
           });
@@ -69,25 +69,25 @@ export class DeckOptionsModal extends Modal {
           out.createDiv({
             text:
               res.lossAfter < res.lossBefore - 1e-4
-                ? `Log loss ${res.lossBefore.toFixed(4)} → ${res.lossAfter.toFixed(4)} (${better}% better fit on ${res.reviews.toLocaleString()} reviews).`
-                : `Your current parameters already fit this history (log loss ${res.lossBefore.toFixed(4)}). Nothing to change.`,
+                ? `Log loss ${res.lossBefore.toFixed(4)} → ${res.lossAfter.toFixed(4)} (качество выше на ${better}% по ${res.reviews.toLocaleString()} повторениям).`
+                : `Текущие параметры уже соответствуют этой истории (log loss ${res.lossBefore.toFixed(4)}). Менять нечего.`,
           });
           if (res.lossAfter >= res.lossBefore - 1e-4) return;
           out.createEl("code", { text: res.weights.join(", "), cls: "fc-fsrs-params" });
           new Setting(out)
-            .setDesc("Using them recalculates every card in this preset from its history, so due dates shift (as when you change FSRS options in Anki).")
+            .setDesc("Их применение пересчитывает каждую карточку этого пресета по её истории, поэтому даты к сроку сдвигаются (как при смене опций FSRS в Anki).")
             .addButton((u) =>
-              u.setButtonText("Use these parameters").setCta().onClick(async () => {
+              u.setButtonText("Применить эти параметры").setCta().onClick(async () => {
                 p.scheduler.weights = res.weights;
                 await this.plugin.saveSettings();
-                new Notice("New FSRS parameters saved for this preset.");
+                new Notice("Новые параметры FSRS сохранены для этого пресета.");
                 this.render();
               }),
             );
         } catch (e) {
           notice.hide();
           console.error("Flashcards: FSRS optimization failed", e);
-          out.setText("Optimization failed; see the developer console.");
+          out.setText("Оптимизация не удалась; смотрите консоль разработчика.");
         } finally {
           b.setDisabled(false);
         }
@@ -99,7 +99,7 @@ export class DeckOptionsModal extends Modal {
     const { contentEl } = this;
     const s = this.plugin.settings;
     contentEl.empty();
-    this.setTitle(this.deck ? `Options: ${this.deck.split("/").join(" › ")}` : "Default preset");
+    this.setTitle(this.deck ? `Настройки: ${this.deck.split("/").join(" › ")}` : "Пресет по умолчанию");
     const presetId = this.deck ? presetIdFor(this.deck, s.deckPresets, s.presets) : DEFAULT_PRESET_ID;
     const p = s.presets[presetId];
     const save = () => this.plugin.saveSettings();
@@ -107,8 +107,8 @@ export class DeckOptionsModal extends Modal {
     if (this.deck) {
       const deck = this.deck;
       new Setting(contentEl)
-        .setName("Hide this deck")
-        .setDesc("Keeps it off the deck list and out of Study all. Its cards and history stay; Browse still finds them.")
+        .setName("Скрыть эту колоду")
+        .setDesc("Убирает колоду из списка колод и из «Учить всё». Карточки и история сохраняются; Обзор по-прежнему находит карточки.")
         .addToggle((t) => t.setValue(this.plugin.isDeckHidden(deck)).onChange((v) => void this.plugin.setDeckHidden(deck, v)));
       const deckKey = this.deck.toLowerCase();
       const own = s.deckPresets[deckKey];
@@ -117,8 +117,8 @@ export class DeckOptionsModal extends Modal {
         .setName("Preset")
         .setDesc(
           own
-            ? `Used by ${users} deck${users === 1 ? "" : "s"}. Changes apply to all of them.`
-            : "Inherited from a parent deck (or Default). Choosing a preset here overrides it for this deck and its sub-decks.",
+            ? `Используется ${users} колод${users === 1 ? "ой" : "ами"}. Изменения применяются ко всем.`
+            : "Наследуется от родительской колоды (или Default). Выбор пресета здесь переопределяет его для этой колоды и её подколод.",
         )
         .addDropdown((d) => {
           for (const x of Object.values(s.presets)) d.addOption(x.id, x.name);
@@ -129,8 +129,8 @@ export class DeckOptionsModal extends Modal {
           });
         })
         .addButton((b) =>
-          b.setButtonText("Save to all subdecks").onClick(async () => {
-            // Anki's "Save to All Subdecks": sub-decks drop their own presets and use this one.
+          b.setButtonText("Сохранить во все подколоды").onClick(async () => {
+            // Anki's "Сохранить для всех вложенных колод": sub-decks drop their own presets and use this one.
             let n = 0;
             for (const d of Object.keys(s.deckPresets)) {
               if (d.startsWith(deckKey + "/")) {
@@ -140,14 +140,14 @@ export class DeckOptionsModal extends Modal {
             }
             s.deckPresets[deckKey] = presetId;
             await save();
-            new Notice(n ? `${n} sub-deck${n === 1 ? "" : "s"} now use this preset.` : "All sub-decks already use this preset.");
+            new Notice(n === 1 ? "Теперь его использует 1 вложенная колода." : `Теперь его используют ${n} вложенных колод.` );
             this.render();
           }),
         )
         .addButton((b) =>
-          b.setButtonText("Add preset").onClick(async () => {
+          b.setButtonText("Добавить пресет").onClick(async () => {
             const id = newPresetId(s.presets);
-            s.presets[id] = { ...structuredClone(p), id, name: `${p.name} copy` };
+            s.presets[id] = { ...structuredClone(p), id, name: `${p.name} (копия)` };
             s.deckPresets[deckKey] = id;
             await save();
             this.render();
@@ -155,7 +155,7 @@ export class DeckOptionsModal extends Modal {
         );
       if (presetId !== DEFAULT_PRESET_ID) {
         new Setting(contentEl)
-          .setName("Preset name")
+          .setName("Название пресета")
           .addText((t) =>
             t.setValue(p.name).onChange((v) => {
               p.name = v.trim() || p.name;
@@ -164,7 +164,7 @@ export class DeckOptionsModal extends Modal {
           )
           .addButton((b) =>
             destructive(b)
-              .setButtonText("Delete preset")
+              .setButtonText("Удалить пресет")
               .onClick(async () => {
                 delete s.presets[presetId];
                 for (const d of Object.keys(s.deckPresets)) if (s.deckPresets[d] === presetId) delete s.deckPresets[d];
@@ -224,47 +224,47 @@ export class DeckOptionsModal extends Modal {
           });
         });
 
-    new Setting(contentEl).setName("Daily limits").setHeading();
-    num("New cards/day", "Anki default: 20", () => p.newPerDay, (v) => (p.newPerDay = v), int);
-    num("Maximum reviews/day", "Anki default: 200", () => p.reviewsPerDay, (v) => (p.reviewsPerDay = v), int);
-    toggle("New cards ignore review limit", "Off (Anki default): new cards stop once the review limit is reached.", () => p.display.newIgnoresReviewLimit, (v) => (p.display.newIgnoresReviewLimit = v));
+    new Setting(contentEl).setName("Дневные лимиты").setHeading();
+    num("Новых карточек в день", "В Anki по умолчанию: 20", () => p.newPerDay, (v) => (p.newPerDay = v), int);
+    num("Максимум повторений в день", "В Anki по умолчанию: 200", () => p.reviewsPerDay, (v) => (p.reviewsPerDay = v), int);
+    toggle("Новые карточки игнорируют лимит повторений", "Выкл (по умолчанию в Anki): новые карточки прекращаются, когда лимит повторений исчерпан.", () => p.display.newIgnoresReviewLimit, (v) => (p.display.newIgnoresReviewLimit = v));
 
-    new Setting(contentEl).setName("New cards").setHeading();
-    steps("Learning steps", "e.g. 1m 10m 1h (units m, h, d). Anki default: 1m 10m", () => p.scheduler.learningSteps, (v) => (p.scheduler.learningSteps = v));
-    choice("New card order", "Anki's insertion order.", { notes: "Order in notes (sequential)", random: "Random" }, () => p.display.newOrder, (v) => (p.display.newOrder = v));
+    new Setting(contentEl).setName("Новые карточки").setHeading();
+    steps("Шаги изучения", "напр. 1м 10м 1ч (единицы м, ч, д). В Anki по умолчанию: 1м 10м", () => p.scheduler.learningSteps, (v) => (p.scheduler.learningSteps = v));
+    choice("Порядок новых карточек", "Порядок вставки Anki.", { notes: "Порядок в заметках (последовательно)", random: "Случайный" }, () => p.display.newOrder, (v) => (p.display.newOrder = v));
 
     new Setting(contentEl).setName("Lapses").setHeading();
-    steps("Relearning steps", "For cards you forgot. Anki default: 10m", () => p.scheduler.relearningSteps, (v) => (p.scheduler.relearningSteps = v));
-    num("Leech threshold", "Lapses before a card counts as a leech (and every half of this after). Anki default: 8. 0 = off.", () => p.leechThreshold, (v) => (p.leechThreshold = v), int);
-    choice("Leech action", "Anki default: Tag only (here: marked ★).", { tag: "Tag only (mark ★)", suspend: "Suspend card" }, () => p.leechAction, (v) => (p.leechAction = v));
+    steps("Шаги доизучения", "Для карточек, которые вы забыли. В Anki по умолчанию: 10 мин", () => p.scheduler.relearningSteps, (v) => (p.scheduler.relearningSteps = v));
+    num("Порог пиявки", "Провалов, прежде чем карточка считается пиявкой (и повторно после каждой половины этого числа). В Anki по умолчанию: 8. 0 = выкл.", () => p.leechThreshold, (v) => (p.leechThreshold = v), int);
+    choice("Что делать с пиявкой", "В Anki по умолчанию: только тег (здесь: пометка ★).", { tag: "Только тег (пометка ★)", suspend: "Приостановить карточку" }, () => p.leechAction, (v) => (p.leechAction = v));
 
-    new Setting(contentEl).setName("Display order").setHeading();
+    new Setting(contentEl).setName("Порядок показа").setHeading();
     choice(
-      "New/review order",
-      "When new cards are shown.",
-      { mix: "Mix with reviews", after: "Show after reviews", before: "Show before reviews" },
+      "Новые/повторения: порядок",
+      "Когда показывать новые карточки.",
+      { mix: "Примешивать к повторениям", after: "Показывать после повторений", before: "Показывать до повторений" },
       () => p.display.newReviewMix,
       (v) => (p.display.newReviewMix = v),
     );
     choice(
-      "Review sort order",
-      "Anki default: due date, then random.",
-      { due: "Due date, then random", ivlAsc: "Ascending intervals", ivlDesc: "Descending intervals", overdue: "Relative overdueness", random: "Random" },
+      "Порядок сортировки повторений",
+      "В Anki по умолчанию: сначала срок, затем случайный порядок.",
+      { due: "По сроку, затем случайный порядок", ivlAsc: "Возрастающие интервалы", ivlDesc: "Убывающие интервалы", overdue: "Относительная просроченность", random: "Случайный" },
       () => p.display.reviewOrder,
       (v) => (p.display.reviewOrder = v),
     );
 
     new Setting(contentEl).setName("FSRS").setHeading();
     num(
-      "Desired retention",
-      "The main dial for review gaps. Lower = longer gaps, fewer reviews (0.85); higher = more reviews (0.95). Anki default: 0.90",
+      "Желаемое удержание",
+      "Главный регулятор интервалов повторения. Ниже — длиннее интервалы и меньше повторений (0.85); выше — больше повторений (0.95). В Anki: 0.90",
       () => p.scheduler.desiredRetention,
       (v) => (p.scheduler.desiredRetention = v),
       (v) => v >= 0.7 && v <= 0.99,
     );
     new Setting(contentEl)
-      .setName("FSRS parameters")
-      .setDesc("Optional. Paste the parameters from Anki's deck options (after Optimize) to use them here. Empty = defaults.")
+      .setName("Параметры FSRS")
+      .setDesc("Необязательно. Вставьте параметры из настроек колоды Anki (после Optimize), чтобы использовать их здесь. Пусто = по умолчанию.")
       .addTextArea((t) => {
         t.setValue(p.scheduler.weights.join(", ")).onChange((v) => {
           const nums = v.split(/[\s,]+/).filter(Boolean).map(Number);
@@ -279,43 +279,43 @@ export class DeckOptionsModal extends Modal {
     this.optimizeRow(contentEl, p, presetId);
 
     new Setting(contentEl).setName("Burying").setHeading();
-    toggle("Bury new siblings", "Other new cards from the same card (cloze c2, the reverse) wait until tomorrow.", () => p.bury.newSiblings, (v) => (p.bury.newSiblings = v));
-    toggle("Bury review siblings", "Same, for review cards.", () => p.bury.reviewSiblings, (v) => (p.bury.reviewSiblings = v));
-    toggle("Bury interday learning siblings", "Same, for cards in learning steps of a day or more.", () => p.bury.learningSiblings, (v) => (p.bury.learningSiblings = v));
+    toggle("Откладывать родственные новые карточки", "Остальные новые варианты этой карточки (cloze c2, обратная) ждут до завтра.", () => p.bury.newSiblings, (v) => (p.bury.newSiblings = v));
+    toggle("Откладывать родственные карточки повторений", "То же для карточек повторений.", () => p.bury.reviewSiblings, (v) => (p.bury.reviewSiblings = v));
+    toggle("Откладывать родственные карточки междневного изучения", "То же для карточек в шагах изучения длиной в день и больше.", () => p.bury.learningSiblings, (v) => (p.bury.learningSiblings = v));
 
     new Setting(contentEl).setName("Timers").setHeading();
-    num("Maximum answer seconds", "Answer time is capped at this for statistics. Anki default: 60", () => p.timer.maxAnswerSecs, (v) => (p.timer.maxAnswerSecs = v), (v) => int(v) && v >= 1 && v <= 7200);
-    toggle("Show answer timer", "A timer in the top bar while you answer.", () => p.timer.show, (v) => (p.timer.show = v));
+    num("Максимум секунд на ответ", "Время ответа для статистики ограничивается этим числом. В Anki по умолчанию: 60", () => p.timer.maxAnswerSecs, (v) => (p.timer.maxAnswerSecs = v), (v) => int(v) && v >= 1 && v <= 7200);
+    toggle("Таймер показа ответа", "Таймер в верхней панели, пока вы отвечаете.", () => p.timer.show, (v) => (p.timer.show = v));
 
-    new Setting(contentEl).setName("Auto Advance").setHeading();
-    contentEl.createDiv({ cls: "setting-item-description", text: "Start it from the review screen's More menu (⋯ → Auto Advance). 0 = off." });
-    num("Seconds to show question for", "", () => p.autoAdvance.questionSecs, (v) => (p.autoAdvance.questionSecs = v), (v) => v >= 0 && v <= 600);
-    num("Seconds to show answer for", "", () => p.autoAdvance.answerSecs, (v) => (p.autoAdvance.answerSecs = v), (v) => v >= 0 && v <= 600);
+    new Setting(contentEl).setName("Автопереход").setHeading();
+    contentEl.createDiv({ cls: "setting-item-description", text: "Запускается из меню «Ещё» экрана повторения (⋯ → Автопереход). 0 — выключено." });
+    num("Сколько секунд показывать вопрос", "", () => p.autoAdvance.questionSecs, (v) => (p.autoAdvance.questionSecs = v), (v) => v >= 0 && v <= 600);
+    num("Сколько секунд показывать ответ", "", () => p.autoAdvance.answerSecs, (v) => (p.autoAdvance.answerSecs = v), (v) => v >= 0 && v <= 600);
     choice(
-      "Answer action",
-      "What happens when the answer time runs out.",
-      { again: "Answer Again", hard: "Answer Hard", good: "Answer Good", bury: "Bury card" },
+      "Действие по таймеру",
+      "Что происходит, когда время на ответ истекает.",
+      { again: "Ответить «Снова»", hard: "Ответить «Трудно»", good: "Ответить «Хорошо»", bury: "Отложить карточку" },
       () => p.autoAdvance.answerAction,
       (v) => (p.autoAdvance.answerAction = v),
     );
 
-    new Setting(contentEl).setName("Card back").setHeading();
+    new Setting(contentEl).setName("Обратная сторона").setHeading();
     new Setting(contentEl)
-      .setName("Show figures from the note section")
-      .setDesc("If a card's back has no picture, show the pictures under the same heading in its note.")
+      .setName("Показывать картинки из раздела заметки")
+      .setDesc("Если на обороте карточки нет картинки, показывать картинки из заметки под тем же заголовком.")
       .addToggle((t) =>
         t.setValue(p.sectionFigures).onChange(async (v) => {
           p.sectionFigures = v;
           await save();
         }),
       );
-    num("Maximum figures", "", () => p.maxFigures, (v) => (p.maxFigures = v), (v) => int(v) && v <= 6);
+    num("Максимум картинок", "", () => p.maxFigures, (v) => (p.maxFigures = v), (v) => int(v) && v <= 6);
 
     new Setting(contentEl).setName("Advanced").setHeading();
-    num("Maximum interval (days)", "Anki default: 36500", () => p.scheduler.maximumInterval, (v) => (p.scheduler.maximumInterval = v), (v) => int(v) && v >= 1);
+    num("Максимальный интервал (дней)", "В Anki по умолчанию: 36500", () => p.scheduler.maximumInterval, (v) => (p.scheduler.maximumInterval = v), (v) => int(v) && v >= 1);
     new Setting(contentEl)
       .setName("Fuzz")
-      .setDesc("Spread review dates slightly so cards learned together don't stay together.")
+      .setDesc("Слегка разбрасывать даты повторений, чтобы карточки, выученные вместе, не ходили вместе.")
       .addToggle((t) =>
         t.setValue(p.scheduler.fuzz).onChange(async (v) => {
           p.scheduler.fuzz = v;
@@ -323,7 +323,7 @@ export class DeckOptionsModal extends Modal {
         }),
       );
     new Setting(contentEl).addButton((b) =>
-      b.setButtonText("Restore Anki defaults").onClick(async () => {
+      b.setButtonText("Вернуть значения Anki").onClick(async () => {
         const d = defaultPreset();
         Object.assign(p, { ...d, id: p.id, name: p.name } satisfies Preset);
         await save();

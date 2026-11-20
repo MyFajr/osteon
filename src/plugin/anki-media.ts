@@ -1,5 +1,5 @@
 /**
- * "Copy Anki pictures into the vault" (desktop only): a big shared deck is exported from Anki without
+ * "Скопировать картинки Anki в хранилище" (desktop only): a big shared deck is exported from Anki without
  * media (a package with media can be too large to import), and this copies just the pictures its
  * imported cards embed, straight from Anki's own collection.media folder.
  */
@@ -71,33 +71,33 @@ export class AnkiMediaModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
-    this.setTitle("Copy Anki pictures into the vault");
+    this.setTitle("Скопировать картинки Anki в хранилище");
     const n = node();
     if (!n || !(this.app.vault.adapter instanceof FileSystemAdapter)) {
-      contentEl.createEl("p", { text: "This works on the desktop app only. Run it on your computer; the pictures then sync to your phone." });
+      contentEl.createEl("p", { text: "Работает только в настольной версии. Запустите на компьютере; картинки затем синхронизируются на ваш телефон." });
       return;
     }
     const missing = missingEmbeds(this.app);
     if (!missing.length) {
-      contentEl.createEl("p", { text: "Every picture your imported Anki cards use is already in the vault." });
+      contentEl.createEl("p", { text: "Все картинки, которые используют импортированные карточки Anki, уже в хранилище." });
       return;
     }
     contentEl.createEl("p", {
-      text: `${missing.length.toLocaleString()} pictures used by your imported Anki cards aren't in the vault yet. Choose Anki's media folder (the profile you imported from) to copy them in. Nothing in Anki is changed.`,
+      text: `${missing.length.toLocaleString()} картинок, используемых импортированными карточками Anki, пока нет в хранилище. Выберите папку медиа Anki (профиль, из которого шёл импорт), чтобы скопировать их. В самом Anki ничего не меняется.`,
     });
     const found = ankiMediaFolders();
     this.dir = found[0]?.dir ?? "";
     if (found.length)
-      new Setting(contentEl).setName("Anki profile").addDropdown((d) => {
+      new Setting(contentEl).setName("Профиль Anki").addDropdown((d) => {
         for (const f of found) d.addOption(f.dir, f.profile);
         d.setValue(this.dir).onChange((v) => (this.dir = v));
       });
     new Setting(contentEl)
-      .setName("Or a folder path")
-      .setDesc("A collection.media folder, if yours isn't listed.")
+      .setName("Или путь к папке")
+      .setDesc("Папка collection.media, если вашей нет в списке.")
       .addText((t) => t.setPlaceholder("/path/to/collection.media").onChange((v) => (this.dir = v.trim() || found[0]?.dir || "")));
     new Setting(contentEl).addButton((b) =>
-      b.setButtonText("Copy pictures").setCta().onClick(() => {
+      b.setButtonText("Копировать картинки").setCta().onClick(() => {
         this.close();
         void copyPictures(this.plugin, this.dir, missing);
       }),
@@ -113,7 +113,7 @@ async function copyPictures(plugin: FlashcardsPlugin, dir: string, missing: stri
   const n = node()!;
   const { fs, path } = n;
   if (!dir || !fs.existsSync(dir)) {
-    new Notice("That Anki media folder doesn't exist.");
+    new Notice("Такой папки медиа Anki не существует.");
     return;
   }
   const base = (plugin.app.vault.adapter as FileSystemAdapter).getBasePath();
@@ -123,7 +123,7 @@ async function copyPictures(plugin: FlashcardsPlugin, dir: string, missing: stri
     byName.set(name, [...(byName.get(name) ?? []), p]);
   }
   const { copy, notFound } = planMediaCopy(byName.keys(), fs.readdirSync(dir));
-  const notice = new Notice("Copying pictures…", 0);
+  const notice = new Notice("Копирование картинок…", 0);
   let done = 0;
   let bytes = 0;
   for (const [orig, safe] of copy) {
@@ -134,15 +134,15 @@ async function copyPictures(plugin: FlashcardsPlugin, dir: string, missing: stri
       bytes += fs.statSync(dest).size;
     }
     if (++done % 250 === 0) {
-      notice.setMessage(`Copying pictures… ${done.toLocaleString()} / ${copy.length.toLocaleString()}`);
+      notice.setMessage(`Копирование картинок… ${done.toLocaleString()} / ${copy.length.toLocaleString()}`);
       await new Promise((r) => window.setTimeout(r, 0));
     }
   }
   notice.hide();
   new Notice(
-    `Copied ${done.toLocaleString()} pictures (${(bytes / 1e9).toFixed(2)} GB)` +
-      (notFound.length ? `; ${notFound.length.toLocaleString()} weren't in that Anki folder.` : ".") +
-      " Obsidian may take a while to index them the first time.",
+    `Скопировано ${done.toLocaleString()} картинок (${(bytes / 1e9).toFixed(2)} ГБ)` +
+      (notFound.length ? `; ${notFound.length.toLocaleString()} не нашлось в той папке Anki.` : ".") +
+      " Obsidian может потратить время на их индексацию в первый раз.",
     15000,
   );
 }

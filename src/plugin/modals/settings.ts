@@ -12,7 +12,7 @@ export class SettingsModal extends Modal {
   }
 
   onOpen(): void {
-    this.setTitle("Osteon settings");
+    this.setTitle("Настройки Osteon");
     this.modalEl.addClass("fc-settings-modal");
     new FlashcardsSettingTab(this.app, this.plugin).drawInto(this.contentEl);
   }

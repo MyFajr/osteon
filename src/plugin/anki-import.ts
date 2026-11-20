@@ -9,6 +9,7 @@ import { applyCardUpdates, convertCollection, sourceHash, imageSize, isIoeNotety
 import { readApkg, readMedia, readMediaBatches, type AnkiCollection } from "../core/anki/package";
 import type { LogEvent } from "../core/log";
 import { newCardId } from "../core/ids";
+import { plural } from "./heatmap";
 import type FlashcardsPlugin from "../main";
 import { fingerprints, loadImportSources, saveImportSources } from "./import-sources";
 import { parseNote } from "../core/parser";
@@ -33,12 +34,12 @@ export function pickAndImportApkg(plugin: FlashcardsPlugin): void {
     const file = input.files?.[0];
     if (!file) return;
     if (!/\.(apkg|colpkg)$/i.test(file.name)) {
-      new Notice("Pick an Anki deck file (.apkg).");
+      new Notice("Выберите файл колоды Anki (.apkg).");
       return;
     }
     const notice = new Notice(`Reading ${file.name}…`, 0);
     try {
-      if (file.size > BIG) new Notice(`This deck is ${(file.size / 1048576).toFixed(0)} MB. Large decks are best imported on the Mac, and very large ones may not fit in memory.`, 10000);
+      if (file.size > BIG) new Notice(`Размер колоды — ${(file.size / 1048576).toFixed(0)} МБ. Большие колоды лучше импортировать на Mac, а очень большие могут не поместиться в память.`, 10000);
       const bytes = new Uint8Array(await file.arrayBuffer());
       const col = readApkg(bytes, await sqlJs());
       notice.hide();
@@ -46,7 +47,7 @@ export function pickAndImportApkg(plugin: FlashcardsPlugin): void {
     } catch (e) {
       notice.hide();
       console.error("Flashcards: couldn't read .apkg", e);
-      new Notice(`Couldn't read ${file.name}: ${e instanceof Error ? e.message : String(e)}`, 10000);
+      new Notice(`Не удалось прочитать ${file.name}: ${e instanceof Error ? e.message : String(e)}`, 10000);
     }
   };
   input.click();
@@ -155,44 +156,44 @@ class ApkgImportModal extends Modal {
 
     const facts = contentEl.createEl("ul", { cls: "fc-import-facts" });
     const fact = (t: string) => facts.createEl("li", { text: t });
-    fact(`${col.notes.length.toLocaleString()} notes → ${col.cards.length.toLocaleString()} cards, ${media.toLocaleString()} pictures/sounds`);
-    fact(`Note types: ${[...types].map(([k, v]) => `${k} (${v})`).join(", ")}`);
-    fact(reviewed ? `Review history for ${reviewed.toLocaleString()} cards` : "No review history (cards start as new)");
-    if (already) fact(`${already.toLocaleString()} notes were imported before`);
+    fact(`${col.notes.length.toLocaleString()} заметок → ${col.cards.length.toLocaleString()} карточек, ${media.toLocaleString()} картинок/звуков`);
+    fact(`Типы заметок: ${[...types].map(([k, v]) => `${k} (${v})`).join(", ")}`);
+    fact(reviewed ? `История повторений для ${reviewed.toLocaleString()} карточек` : "Без истории повторений (карточки начнут как новые)");
+    if (already) fact(`${already.toLocaleString()} заметок уже импортировались ранее`);
     const decks = contentEl.createDiv({ cls: "fc-import-decks" });
-    decks.createDiv({ text: "Decks:", cls: "fc-muted" });
+    decks.createDiv({ text: "Колоды:", cls: "fc-muted" });
     const ul = decks.createEl("ul");
     for (const [d, c] of [...deckCounts].sort((a, b) => a[0].localeCompare(b[0])).slice(0, 30)) ul.createEl("li", { text: `${d.split("::").join(" › ")} (${c})` });
-    if (deckCounts.size > 30) decks.createDiv({ cls: "fc-muted", text: `…and ${deckCounts.size - 30} more` });
+    if (deckCounts.size > 30) decks.createDiv({ cls: "fc-muted", text: `…и ещё ${deckCounts.size - 30}` });
 
     new Setting(contentEl)
       .setName("Folder")
-      .setDesc("Imported decks go here, one note per deck.")
+      .setDesc("Импортированные колоды кладутся сюда, одна заметка на колоду.")
       .addText((t) => t.setValue(this.root).onChange((v) => (this.root = v.trim().replace(/^\/+|\/+$/g, "") || "Anki")));
     if (reviewed || col.cards.some((c) => c.type === 2)) {
       new Setting(contentEl)
-        .setName("Keep review history")
-        .setDesc("Cards keep their Anki schedule and memory state.")
+        .setName("Сохранять историю повторений")
+        .setDesc("Карточки сохраняют расписание Anki и состояние памяти.")
         .addToggle((t) => t.setValue(this.includeScheduling).onChange((v) => (this.includeScheduling = v)));
     }
     if (already)
       new Setting(contentEl)
-        .setName("Update cards imported before")
+        .setName("Обновить ранее импортированные карточки")
         .setDesc(
-          `Rewrite the ${already.toLocaleString()} cards you already have with this deck's current version (e.g. a newer AnKing), keeping their review history. Off: they are skipped.`,
+          `Перезаписать уже имеющиеся ${already.toLocaleString()} карточек текущей версией этой колоды (например, более новый AnKing), сохранив историю повторений. Выкл.: они будут пропущены.`,
         )
         .addToggle((t) => t.setValue(this.updateExisting).onChange((v) => (this.updateExisting = v)));
     if (already)
       new Setting(contentEl)
-        .setName("Keep cards I edited in Obsidian")
-        .setDesc("Cards you changed in Obsidian since they were imported are left as they are, not replaced by the deck's version.")
+        .setName("Сохранять карточки, отредактированные в Obsidian")
+        .setDesc("Карточки, изменённые в Obsidian после импорта, останутся как есть и не будут заменены версией из колоды.")
         .addToggle((t) => t.setValue(this.keepEdits).onChange((v) => (this.keepEdits = v)));
     new Setting(contentEl)
-      .setName("Keep Anki tags")
-      .setDesc("Off by default: shared decks carry very long tag lists.")
+      .setName("Сохранять теги Anki")
+      .setDesc("По умолчанию выключено: у общих колод бывают очень длинные списки тегов.")
       .addToggle((t) => t.setValue(this.keepTags).onChange((v) => (this.keepTags = v)));
     new Setting(contentEl)
-      .addButton((b) => b.setButtonText("Cancel").onClick(() => this.close()))
+      .addButton((b) => b.setButtonText("Отмена").onClick(() => this.close()))
       .addButton((b) =>
         b
           .setButtonText("Import")
@@ -235,7 +236,7 @@ class ApkgImportModal extends Modal {
         return r.text;
       });
       if (written !== null) plugin.index.updateFromText(file, written);
-      if (++done % 10 === 0) notice.setMessage(`Updating existing cards… ${done} / ${byFile.size} notes`);
+      if (++done % 10 === 0) notice.setMessage(`Обновление существующих карточек… ${done} / ${byFile.size} заметок`);
     }
     if (changed) await saveImportSources(plugin, this.sources);
     return { changed, kept };
@@ -287,21 +288,21 @@ class ApkgImportModal extends Modal {
         pathExists: (p) => existing.has(p.toLowerCase()),
       });
       const { changed: updated, kept } = result.updates.length ? await this.applyUpdates(result.updates, notice) : { changed: 0, kept: 0 };
-      const keptNote = kept ? ` ${kept.toLocaleString()} card${kept === 1 ? "" : "s"} you edited in Obsidian were kept as they are.` : "";
+      const keptNote = kept ? ` ${plural(kept, "card")}, изменённых в Obsidian, остались как есть.` : "";
       if (!result.files.length) {
         notice.hide();
         new Notice(
           result.updates.length
-            ? `No new notes. ${updated.toLocaleString()} of ${result.updates.length.toLocaleString()} existing cards had changed and were updated (history kept).${keptNote}`
+            ? `Новых заметок нет. ${updated.toLocaleString()} из ${result.updates.length.toLocaleString()} уже имеющихся карточек изменились и были обновлены (история сохранена).${keptNote}`
             : result.stats.skipped
-              ? "Every note in this deck was already imported."
-              : "No cards found in this deck.",
+              ? "Каждая заметка этой колоды уже импортирована."
+              : "В этой колоде не нашлось карточек.",
           10000,
         );
         this.close();
         return;
       }
-      if (updated || kept) new Notice(`${updated.toLocaleString()} existing cards were updated to the deck's current version (history kept).${keptNote}`, 10000);
+      if (updated || kept) new Notice(`${updated.toLocaleString()} уже имеющихся карточек обновлены до текущей версии колоды (история сохранена).${keptNote}`, 10000);
 
       // Pictures and sounds, a few at a time, so a large deck never holds all its media in memory.
       let written = 0;
@@ -321,11 +322,11 @@ class ApkgImportModal extends Modal {
             console.warn(`Flashcards: couldn't write ${path}`, e);
           }
         }
-        notice.setMessage(`Writing pictures… ${done}/${total}`);
+        notice.setMessage(`Запись картинок… ${done}/${total}`);
       }
 
       // Notes: each file on its own, so one failure doesn't lose the rest (or their history).
-      notice.setMessage("Writing notes…");
+      notice.setMessage("Запись заметок…");
       const okIds = new Set<string>();
       const okGuids: Array<{ guid: string; id: string; hub: string }> = [];
       let failed = 0;
@@ -356,15 +357,15 @@ class ApkgImportModal extends Modal {
         else await app.vault.create(mpath, `${MANIFEST_HEADER}\n\n${lines}`);
       }
       const events: LogEvent[] = result.events.filter((e) => okIds.has(e.key.split(".")[0]));
-      if (failed) new Notice(`${failed} deck file(s) couldn't be written; see the developer console.`, 10000);
+      if (failed) new Notice(`Не удалось записать файлы колод (${failed}); см. консоль разработчика.`, 10000);
 
       await plugin.logEvents(events);
       notice.hide();
       const s = result.stats;
       new Notice(
-        `Imported ${s.notes.toLocaleString()} notes (${s.cards.toLocaleString()} cards) into ${result.files.length} note${result.files.length === 1 ? "" : "s"}` +
-          `${written ? `, ${written} pictures` : ""}${s.withHistory ? `; ${s.withHistory.toLocaleString()} cards kept their history` : ""}` +
-          `${s.skipped ? `; ${s.skipped} skipped (already imported)` : ""}${s.empty + s.unsupported ? `; ${s.empty + s.unsupported} empty or unsupported` : ""}.`,
+        `Импортировано ${s.notes.toLocaleString()} заметок (${s.cards.toLocaleString()} карточек) в ${result.files.length} заметок` +
+          `${written ? `, ${written} картинок` : ""}${s.withHistory ? `; ${s.withHistory.toLocaleString()} карточек сохранили историю` : ""}` +
+          `${s.skipped ? `; ${s.skipped} пропущены (уже импортированы)` : ""}${s.empty + s.unsupported ? `; ${s.empty + s.unsupported} пустых или неподдерживаемых` : ""}.`,
         12000,
       );
       this.close();
@@ -372,7 +373,7 @@ class ApkgImportModal extends Modal {
     } catch (e) {
       notice.hide();
       console.error("Flashcards: import failed", e);
-      new Notice(`Import failed: ${e instanceof Error ? e.message : String(e)}`, 10000);
+      new Notice(`Импорт не удался: ${e instanceof Error ? e.message : String(e)}`, 10000);
       this.close();
     }
   }
