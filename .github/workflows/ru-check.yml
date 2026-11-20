@@ -1,0 +1,58 @@
+name: Russian branch validation
+
+on:
+  push:
+    branches:
+      - "vibe/russian-translation-05232a"
+  pull_request:
+    branches:
+      - "vibe/russian-translation-05232a"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out translation branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npm run typecheck
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Build production plugin
+        run: npm run build
+
+      - name: Verify installable plugin files
+        run: |
+          test -s main.js
+          test -s manifest.json
+          test -s styles.css
+          node -e "const m=require('./manifest.json'); if (!m.id || !m.version || m.isDesktopOnly) process.exit(1); console.log('Plugin manifest OK:', m.id, m.version)"
+
+      - name: Upload built plugin files
+        uses: actions/upload-artifact@v4
+        with:
+          name: osteon-russian-1.4.4
+          path: |
+            main.js
+            manifest.json
+            styles.css
+          if-no-files-found: error
+          retention-days: 30
