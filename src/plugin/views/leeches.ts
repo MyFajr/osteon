@@ -23,7 +23,7 @@ export class LeechesView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Leeches";
+    return "Карточки, которые часто забываются";
   }
 
   getIcon(): string {
@@ -51,13 +51,13 @@ export class LeechesView extends ItemView {
       return;
     }
     const leeches = this.plugin.leeches();
-    el.createEl("h3", { text: `Пиявки (${leeches.length})` });
+    el.createEl("h3", { text: `Карточки, которые часто забываются (${leeches.length})` });
     el.createEl("p", {
       cls: "fc-muted",
       text: "Карточки, которые вы всё забываете (число провалов дошло до порога пиявок колоды). Обычно так бывает, когда карточка требует слишком многого сразу: перепишите её, включите открытие ответов по одному или уберите её.",
     });
     if (!leeches.length) {
-      el.createDiv({ cls: "fc-muted", text: "Сейчас пиявок нет." });
+      el.createDiv({ cls: "fc-muted", text: "Сейчас таких карточек нет." });
       return;
     }
     for (const item of leeches) this.row(el, item);
@@ -68,7 +68,7 @@ export class LeechesView extends ItemView {
     const box = parent.createDiv({ cls: "fc-leech" });
     const meta = box.createDiv({ cls: "fc-leech-meta fc-muted" });
     meta.setText(
-      [ref.deck.split("/").join(" › "), `${state?.card.lapses ?? 0} провалов`, state?.suspended ? "suspended" : "", state?.marked ? "★ помечена" : ""]
+      [ref.deck.split("/").join(" › "), `${state?.card.lapses ?? 0} провалов`, state?.suspended ? "приостановлена" : "", state?.marked ? "★ помечена" : ""]
         .filter(Boolean)
         .join(" · "),
     );
@@ -81,7 +81,7 @@ export class LeechesView extends ItemView {
       const b = bar.createEl("button", { text, cls: cta ? "mod-cta" : "", attr: { "aria-label": title } });
       b.onclick = () => void fn();
     };
-    btn("Rewrite", "Исправить карточку и вернуть в повторения", () => {
+    btn("Исправить", "Исправить карточку и вернуть в повторения", () => {
       new EditCardModal(this.app, this.plugin, ref, () => void this.plugin.resolveLeech(item, "retry", "Переработана и возвращена в повторения.")).open();
     }, true);
     if (ref.card.type === "cloze" && !this.plugin.isCrowned(ref)) {
@@ -91,7 +91,7 @@ export class LeechesView extends ItemView {
       });
     }
     btn("Попробовать снова", "Вернуть в занятия как есть", () => this.plugin.resolveLeech(item, "retry", "Возвращено в повторения."));
-    btn("Drop", "Оставить приостановленной и убрать из этого списка", () => this.plugin.resolveLeech(item, "drop", "Исключена (приостановлена)."));
+    btn("Исключить", "Оставить приостановленной и убрать из этого списка", () => this.plugin.resolveLeech(item, "drop", "Исключена (приостановлена)."));
     btn("Открыть заметку", "Открыть заметку карточки", () => {
       const file = this.app.vault.getFileByPath(ref.path);
       if (file) void this.app.workspace.getLeaf("tab").openFile(file, { eState: { line: ref.card.startLine } });
