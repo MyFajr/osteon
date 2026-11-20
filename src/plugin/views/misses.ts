@@ -90,7 +90,7 @@ export class MissesView extends ItemView {
     }
     const table = el.createEl("table", { cls: "fc-misses-table" });
     const hr = table.createEl("thead").createEl("tr");
-    for (const h of ["Missed", "Topic", "Where", "Карточки", ""]) hr.createEl("th", { text: h });
+    for (const h of ["Ошибки", "Тема", "Источник", "Карточки", ""]) hr.createEl("th", { text: h });
     const body = table.createEl("tbody");
     for (const m of ranking) {
       const file = this.app.vault.getFileByPath(m.path);
