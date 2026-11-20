@@ -185,7 +185,7 @@ export class WeakView extends ItemView {
       b.setText("Объяснить");
       if (out) showExplanation(out);
     });
-    btn("Rewrite", "Изменить карточку", () => new EditCardModal(this.app, plugin, ref, () => this.render()).open());
+    btn("Изменить", "Изменить карточку", () => new EditCardModal(this.app, plugin, ref, () => this.render()).open());
     if (ref.card.type === "cloze" && !plugin.isCrowned(ref)) {
       btn("🦴 Открывать по одному", "Открывать ответы по одному", async () => {
         await plugin.setCrowns([ref], true);
