@@ -1300,7 +1300,7 @@ class NotePicker extends SuggestModal<NotePick> {
     if (hits.length) {
       return hits.flatMap((h) => {
         const file = this.app.vault.getFileByPath(h.path);
-        return file ? [{ file, detail: h.heading ? `Section: ${h.heading}` : undefined }] : [];
+        return file ? [{ file, detail: h.heading ? `Раздел: ${h.heading}` : undefined }] : [];
       });
     }
     // Nothing word for word: loose letter matching on the title, so a typo still finds the note.
