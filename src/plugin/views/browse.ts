@@ -106,7 +106,7 @@ export class BrowseView extends ItemView {
 
   private refresh(): void {
     if (!this.plugin.ready) {
-      this.countEl.setText("Loading…");
+      this.countEl.setText("Загрузка…");
       return;
     }
     let match: (i: QueueItem) => boolean;
@@ -141,7 +141,7 @@ export class BrowseView extends ItemView {
       this.renderList();
       this.renderBulk();
     };
-    for (const col of ["Card", "Колода", "К сроку", "Интервал", "Difficulty", "Lapses"]) head.createEl("th", { text: col });
+    for (const col of ["Карточка", "Колода", "К сроку", "Интервал", "Сложность", "Забывания"]) head.createEl("th", { text: col });
     const body = table.createEl("tbody");
     const now = Date.now();
     for (const item of this.results.slice(0, MAX_ROWS)) {
