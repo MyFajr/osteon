@@ -113,8 +113,8 @@ export class WeakView extends ItemView {
 
     let weak = weakCards(items, since, range.minMisses);
     if (this.topic) weak = weak.filter((w) => topicOf(w.item.ref) === this.topic);
-    const what = range.days ? `за последние ${range.days} дней` : "today";
-    el.createEl("h4", { text: `Cards missed ${range.minMisses}+ times ${what}${this.topic ? ` · ${this.topic}` : ""} (${weak.length})` });
+    const what = range.days ? `за последние ${range.days} дней` : "за сегодня";
+    el.createEl("h4", { text: `Карточки с ${range.minMisses}+ ошибками ${what}${this.topic ? ` · ${this.topic}` : ""} (${weak.length})` });
     if (!weak.length) {
       el.createDiv({ cls: "fc-muted", text: range.days ? "Пусто." : "На сегодня пусто. Карточки, которые вы пропускаете дважды и более за день, появляются здесь." });
       return;
