@@ -1,6 +1,6 @@
 # ТЗ: русская локализация плагина Osteon
 
-Статус: выполнено (ветка `vibe/russian-translation-05232a`).
+Статус: финальная проверка и автоматическая сборка в GitHub Actions (ветка `vibe/russian-translation-05232a`).
 Объект: плагин Obsidian «Osteon» v1.4.4 (flashcards в стиле Anki).
 Файлы: `src/**` (~16k строк TypeScript), `manifest.json`. Сборка: esbuild; тесты: vitest.
 
@@ -42,14 +42,14 @@
 | Again / Hard / Good / Easy | Снова / Трудно / Хорошо / Легко |
 | review | повторение |
 | learning | изучение |
-| due / due date | к сроку |
+| due / due date | к повторению / дата повторения |
 | bury | отложить |
 | suspend / suspended | приостановить / приостановлена |
-| leech | пиявка |
+| leech | карточка, которую часто забывают |
 | lapse | провал |
 | new cards | новые карточки |
-| filtered deck | фильтровальная колода |
-| custom study | Своё занятие |
+| filtered deck | отфильтрованная колода |
+| custom study | Выборочное изучение |
 | deck preset | пресет колоды |
 | sub-deck | вложенная колода |
 | image occlusion | скрытие изображения |
