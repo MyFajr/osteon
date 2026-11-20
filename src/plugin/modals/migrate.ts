@@ -59,10 +59,10 @@ export class MigrateModal extends Modal {
         "Перед переносом выключите плагин Spaced Repetition (чтобы он не вернул свои комментарии) и сделайте копию папки, если захотите откатить.",
     });
     new Setting(contentEl)
-      .setName("Folder")
+      .setName("Папка")
       .setDesc("Оставьте пустым, чтобы взять все заметки с #flashcards в хранилище.")
       .addText((t) => t.setPlaceholder("напр. Ортопедия").onChange((v) => (this.folder = v.trim().replace(/^\/+|\/+$/g, ""))))
-      .addButton((b) => b.setButtonText("Preview").setCta().onClick(() => void this.runPreview()));
+      .addButton((b) => b.setButtonText("Предпросмотр").setCta().onClick(() => void this.runPreview()));
     this.resultEl = contentEl.createDiv();
   }
 
