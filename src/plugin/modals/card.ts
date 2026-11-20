@@ -53,6 +53,8 @@ export class EditCardModal extends Modal {
   }
 }
 
+const RATING_NAME: Record<string, string> = { again: "Снова", hard: "Трудно", good: "Хорошо", easy: "Легко" };
+
 const STATE_NAME: Record<number, string> = {
   [State.New]: "Новые",
   [State.Learning]: "Изучение",
@@ -102,7 +104,7 @@ export class CardInfoModal extends Modal {
       ["Забывания", String(c?.lapses ?? 0)],
       [
         "Среднее время",
-        s?.reviews.length ? `${(s.reviews.reduce((a, r) => a + r.ms, 0) / s.reviews.length / 1000).toFixed(1)}s` : "—",
+        s?.reviews.length ? `${(s.reviews.reduce((a, r) => a + r.ms, 0) / s.reviews.length / 1000).toFixed(1)} с` : "—",
       ],
     ];
     if (s?.suspended) rows.push(["Статус", "Приостановлена"]);
@@ -121,7 +123,7 @@ export class CardInfoModal extends Modal {
         const tr = h.createEl("tr");
         tr.createEl("td", { text: fmtDate(r.ts) });
         tr.createEl("td", { text: STATE_NAME[r.stateBefore] === "Новые" ? "Изучение" : STATE_NAME[r.stateBefore] });
-        tr.createEl("td", { text: ({ again: "Снова", hard: "Трудно", good: "Хорошо", easy: "Легко" }[r.rating] ?? r.rating), cls: `fc-${r.rating}` });
+        tr.createEl("td", { text: (RATING_NAME[r.rating] ?? r.rating), cls: `fc-${r.rating}` });
         tr.createEl("td", { text: formatInterval(r.due.getTime() - Date.parse(r.ts)) });
         tr.createEl("td", { text: `${(r.ms / 1000).toFixed(1)} с` });
         tr.createEl("td", { text: r.device ?? "" });
