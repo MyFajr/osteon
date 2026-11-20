@@ -69,8 +69,8 @@ export class DeckOptionsModal extends Modal {
           out.createDiv({
             text:
               res.lossAfter < res.lossBefore - 1e-4
-                ? `Log loss ${res.lossBefore.toFixed(4)} → ${res.lossAfter.toFixed(4)} (качество выше на ${better}% по ${res.reviews.toLocaleString()} повторениям).`
-                : `Текущие параметры уже соответствуют этой истории (log loss ${res.lossBefore.toFixed(4)}). Менять нечего.`,
+                ? `Логарифмическая потеря (log loss): ${res.lossBefore.toFixed(4)} → ${res.lossAfter.toFixed(4)} (качество выше на ${better}% по ${res.reviews.toLocaleString()} повторениям).`
+                : `Текущие параметры уже соответствуют этой истории (логарифмическая потеря: ${res.lossBefore.toFixed(4)}). Менять нечего.`,
           });
           if (res.lossAfter >= res.lossBefore - 1e-4) return;
           out.createEl("code", { text: res.weights.join(", "), cls: "fc-fsrs-params" });
@@ -114,11 +114,11 @@ export class DeckOptionsModal extends Modal {
       const own = s.deckPresets[deckKey];
       const users = Object.keys(s.deckPresets).filter((d) => s.deckPresets[d] === presetId).length;
       new Setting(contentEl)
-        .setName("Preset")
+        .setName("Профиль настроек")
         .setDesc(
           own
             ? `Используется ${users} колод${users === 1 ? "ой" : "ами"}. Изменения применяются ко всем.`
-            : "Наследуется от родительской колоды (или Default). Выбор пресета здесь переопределяет его для этой колоды и её подколод.",
+            : "Наследуется от родительской колоды (или профиля по умолчанию). Выбор профиля здесь переопределяет его для этой колоды и её подколод.",
         )
         .addDropdown((d) => {
           for (const x of Object.values(s.presets)) d.addOption(x.id, x.name);
@@ -233,10 +233,10 @@ export class DeckOptionsModal extends Modal {
     steps("Шаги изучения", "напр. 1м 10м 1ч (единицы м, ч, д). В Anki по умолчанию: 1м 10м", () => p.scheduler.learningSteps, (v) => (p.scheduler.learningSteps = v));
     choice("Порядок новых карточек", "Порядок вставки Anki.", { notes: "Порядок в заметках (последовательно)", random: "Случайный" }, () => p.display.newOrder, (v) => (p.display.newOrder = v));
 
-    new Setting(contentEl).setName("Lapses").setHeading();
+    new Setting(contentEl).setName("Забывания").setHeading();
     steps("Шаги доизучения", "Для карточек, которые вы забыли. В Anki по умолчанию: 10 мин", () => p.scheduler.relearningSteps, (v) => (p.scheduler.relearningSteps = v));
-    num("Порог пиявки", "Провалов, прежде чем карточка считается пиявкой (и повторно после каждой половины этого числа). В Anki по умолчанию: 8. 0 = выкл.", () => p.leechThreshold, (v) => (p.leechThreshold = v), int);
-    choice("Что делать с пиявкой", "В Anki по умолчанию: только тег (здесь: пометка ★).", { tag: "Только тег (пометка ★)", suspend: "Приостановить карточку" }, () => p.leechAction, (v) => (p.leechAction = v));
+    num("Порог забывания", "Провалов, прежде чем карточка считается пиявкой (и повторно после каждой половины этого числа). В Anki по умолчанию: 8. 0 = выкл.", () => p.leechThreshold, (v) => (p.leechThreshold = v), int);
+    choice("Что делать с такой карточкой", "В Anki по умолчанию: только тег (здесь: пометка ★).", { tag: "Только тег (пометка ★)", suspend: "Приостановить карточку" }, () => p.leechAction, (v) => (p.leechAction = v));
 
     new Setting(contentEl).setName("Порядок показа").setHeading();
     choice(
@@ -278,12 +278,12 @@ export class DeckOptionsModal extends Modal {
       });
     this.optimizeRow(contentEl, p, presetId);
 
-    new Setting(contentEl).setName("Burying").setHeading();
+    new Setting(contentEl).setName("Отложение карточек").setHeading();
     toggle("Откладывать родственные новые карточки", "Остальные новые варианты этой карточки (cloze c2, обратная) ждут до завтра.", () => p.bury.newSiblings, (v) => (p.bury.newSiblings = v));
     toggle("Откладывать родственные карточки повторений", "То же для карточек повторений.", () => p.bury.reviewSiblings, (v) => (p.bury.reviewSiblings = v));
     toggle("Откладывать родственные карточки междневного изучения", "То же для карточек в шагах изучения длиной в день и больше.", () => p.bury.learningSiblings, (v) => (p.bury.learningSiblings = v));
 
-    new Setting(contentEl).setName("Timers").setHeading();
+    new Setting(contentEl).setName("Таймеры").setHeading();
     num("Максимум секунд на ответ", "Время ответа для статистики ограничивается этим числом. В Anki по умолчанию: 60", () => p.timer.maxAnswerSecs, (v) => (p.timer.maxAnswerSecs = v), (v) => int(v) && v >= 1 && v <= 7200);
     toggle("Таймер показа ответа", "Таймер в верхней панели, пока вы отвечаете.", () => p.timer.show, (v) => (p.timer.show = v));
 
@@ -294,7 +294,7 @@ export class DeckOptionsModal extends Modal {
     choice(
       "Действие по таймеру",
       "Что происходит, когда время на ответ истекает.",
-      { again: "Ответить «Снова»", hard: "Ответить «Трудно»", good: "Ответить «Хорошо»", bury: "Отложить карточку" },
+      { again: "Ответить «Снова»", hard: "Ответить «Трудно»", good: "Ответить «Хорошо»", bury: "Отложить до завтра" },
       () => p.autoAdvance.answerAction,
       (v) => (p.autoAdvance.answerAction = v),
     );
@@ -311,10 +311,10 @@ export class DeckOptionsModal extends Modal {
       );
     num("Максимум картинок", "", () => p.maxFigures, (v) => (p.maxFigures = v), (v) => int(v) && v <= 6);
 
-    new Setting(contentEl).setName("Advanced").setHeading();
+    new Setting(contentEl).setName("Дополнительно").setHeading();
     num("Максимальный интервал (дней)", "В Anki по умолчанию: 36500", () => p.scheduler.maximumInterval, (v) => (p.scheduler.maximumInterval = v), (v) => int(v) && v >= 1);
     new Setting(contentEl)
-      .setName("Fuzz")
+      .setName("Случайный сдвиг дат")
       .setDesc("Слегка разбрасывать даты повторений, чтобы карточки, выученные вместе, не ходили вместе.")
       .addToggle((t) =>
         t.setValue(p.scheduler.fuzz).onChange(async (v) => {
