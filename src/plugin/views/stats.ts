@@ -311,7 +311,7 @@ export class StatsView extends ItemView {
       const u = time ? "мин" : "повт.";
       const f = (v: number) => (time ? v.toFixed(1) : String(Math.round(v)));
       this.summary(body, [
-        ["Дней занятий:", `${p.daysStudied} of ${p.daysTotal} (${pct(p.daysStudied, p.daysTotal)})`],
+        ["Дней занятий:", `${p.daysStudied} из ${p.daysTotal} (${pct(p.daysStudied, p.daysTotal)})`],
         ["Всего:", `${f(p.total)} ${u}`],
         ["Среднее за дни занятий:", `${f(p.avgStudied)} ${u}/день`],
         ["Среднее за период:", `${f(p.avgOverall)} ${u}/день`],
@@ -398,7 +398,7 @@ export class StatsView extends ItemView {
       const z = Math.max(a, Math.ceil(b.to) - 1);
       const title = a === z ? `${what}: ${plural(a, "дней")}` : `${what}: ${a}–${z} дн.`;
       return {
-        label: `${a}d`,
+        label: `${a} д`,
         title,
         segments: [{ value: b.count, cls: "fc-c-ivl", label: "Карточки" }],
         onClick: b.count && search ? this.browse(search(a, z)) : undefined,
@@ -412,7 +412,7 @@ export class StatsView extends ItemView {
     this.section(el, "Стабильность карточек", (body) => {
       const s = withState.map((i) => i.state!.card.stability);
       if (!s.length) return void body.createDiv({ cls: "fc-muted", text: "До повторений карточки ещё не дошли." });
-      this.dayHistogram(body, s, Math.max(1, percentile(s, 0.95)), "Stability", (a, b) => `prop:s>=${a} prop:s<=${b + 1}`);
+      this.dayHistogram(body, s, Math.max(1, percentile(s, 0.95)), "Стабильность", (a, b) => `prop:s>=${a} prop:s<=${b + 1}`);
       this.summary(body, [["Средняя стабильность:", formatInterval((s.reduce((a, b) => a + b, 0) / s.length) * 86400000)]]);
     });
     this.section(el, "Сложность карточек", (body) => {
